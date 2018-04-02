@@ -1,0 +1,141 @@
+<xs:schema xmlns="https://github.com/developframework/hickey/schema"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://github.com/developframework/hickey/schema"
+           elementFormDefault="qualified">
+    <xs:element name="hickey-configuration">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="remote-interfaces">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="domain-prefix" type="xs:string"/>
+                            <xs:element name="remote-interface" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="request" type="request"/>
+                                        <xs:element name="response" type="response"/>
+                                    </xs:sequence>
+                                    <xs:attribute name="id" use="required"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="request">
+        <xs:sequence>
+            <xs:element name="url" type="xs:string"/>
+            <xs:element name="parameters" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="parameter" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:simpleContent>
+                                    <xs:extension base="xs:string">
+                                        <xs:attribute name="name" type="xs:string" use="required"/>
+                                    </xs:extension>
+                                </xs:simpleContent>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="headers" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="header" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:simpleContent>
+                                    <xs:extension base="xs:string">
+                                        <xs:attribute name="name" type="xs:string" use="required"/>
+                                    </xs:extension>
+                                </xs:simpleContent>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:choice>
+                <xs:element name="form" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="property" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute name="name" type="xs:string" use="required"/>
+                                            <xs:attribute name="value" type="xs:string"/>
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="type" use="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="x-www-form-urlencoded"/>
+                                    <xs:enumeration value="form-data"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="body" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="provider">
+                                <xs:complexType>
+                                    <xs:choice>
+                                        <xs:element name="default-provider">
+                                        </xs:element>
+                                        <xs:element name="file-provider">
+                                            <xs:complexType>
+                                                <xs:attribute name="file" use="required"/>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="kite-provider">
+                                            <xs:complexType>
+                                                <xs:attribute name="namespace" use="required"/>
+                                                <xs:attribute name="template-id" use="required"/>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:any />
+                                    </xs:choice>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="type" use="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="JSON"/>
+                                    <xs:enumeration value="XML"/>
+                                    <xs:enumeration value="TEXT"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="method" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="GET"/>
+                    <xs:enumeration value="POST"/>
+                    <xs:enumeration value="PUT"/>
+                    <xs:enumeration value="DELETE"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="response">
+        <xs:sequence>
+            <xs:element name="body"></xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

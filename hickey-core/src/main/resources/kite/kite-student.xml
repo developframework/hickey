@@ -1,0 +1,13 @@
+<kite-configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns="https://github.com/developframework/kite/schema"
+                    xsi:schemaLocation="
+	https://github.com/developframework/kite/schema kite-configuration-0.1.xsd">
+
+    <template-package namespace="kite-student">
+
+        <template id="student-detail" data="body.student" xml-root="student">
+            <property data="id"/>
+            <property data="name" xml-cdata="true"/>
+        </template>
+    </template-package>
+</kite-configuration>
