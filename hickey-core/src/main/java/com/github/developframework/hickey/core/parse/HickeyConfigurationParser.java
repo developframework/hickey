@@ -44,11 +44,16 @@ public class HickeyConfigurationParser {
     @SuppressWarnings("unchecked")
     private void parseRemoteInterfaceCollectionElement(Element hickeyConfigurationElement) {
         Element remoteInterfacesElement = hickeyConfigurationElement.element("remote-interfaces");
+        final String groupName = remoteInterfacesElement.attributeValue("group-name");
+        final RemoteInterfaceGroup group = hickeyConfiguration.addRemoteInterfaceGroup(groupName);
+        Element domainPrefixElement = remoteInterfacesElement.element("domain-prefix");
+        if(domainPrefixElement != null) {
+            group.setDomainPrefix(domainPrefixElement.getTextTrim());
+        }
         for (Iterator<Element> remoteInterfacesIterator = remoteInterfacesElement.elementIterator("remote-interface"); remoteInterfacesIterator.hasNext(); ) {
             Element remoteInterfaceElement = remoteInterfacesIterator.next();
-            parseRemoteInterfaceElement(remoteInterfaceElement);
+            parseRemoteInterfaceElement(group, remoteInterfaceElement);
         }
-
     }
 
     /**
@@ -56,12 +61,12 @@ public class HickeyConfigurationParser {
      *
      * @param remoteInterfaceElement
      */
-    private void parseRemoteInterfaceElement(Element remoteInterfaceElement) {
+    private void parseRemoteInterfaceElement(RemoteInterfaceGroup group, Element remoteInterfaceElement) {
         final String id = remoteInterfaceElement.attributeValue("id");
-        RemoteInterface remoteInterface = new RemoteInterface(id);
-        hickeyConfiguration.addRemoteInterface(remoteInterface);
+        RemoteInterface remoteInterface = new RemoteInterface(group.getGroupName(), id);
         Element requestElement = remoteInterfaceElement.element("request");
         parseRequestElement(remoteInterface, requestElement);
+        group.addRemoteInterface(remoteInterface);
     }
 
     /**
@@ -72,7 +77,7 @@ public class HickeyConfigurationParser {
      */
     @SuppressWarnings("unchecked")
     private void parseRequestElement(RemoteInterface remoteInterface, Element requestElement) {
-        final String url = requestElement.element("url").getTextTrim();
+        String url = requestElement.element("url").getTextTrim();
         final HttpMethod method = HttpMethod.valueOf(requestElement.attributeValue("method"));
         RemoteInterfaceRequest request = new RemoteInterfaceRequest(url, method);
 
@@ -88,7 +93,7 @@ public class HickeyConfigurationParser {
             for (Iterator<Element> headerIterator = headersElement.elementIterator("header"); headerIterator.hasNext(); ) {
                 Element headerElement = headerIterator.next();
                 final String name = headerElement.attributeValue("name");
-                HickeyValue value = new HickeyValue(hickeyConfiguration.getValuePlaceholder(), headerElement.getTextTrim());
+                HickeyValue value = new HickeyValue(headerElement.getTextTrim());
                 request.addHeader(new RemoteInterfaceRequestHeader(name, value));
             }
         }
@@ -99,7 +104,7 @@ public class HickeyConfigurationParser {
             for (Iterator<Element> parameterIterator = parametersElement.elementIterator("parameter"); parameterIterator.hasNext(); ) {
                 Element parameterElement = parameterIterator.next();
                 final String name = parameterElement.attributeValue("name");
-                HickeyValue value = new HickeyValue(hickeyConfiguration.getValuePlaceholder(), parameterElement.getTextTrim());
+                HickeyValue value = new HickeyValue(parameterElement.getTextTrim());
                 request.addParameter(new RemoteInterfaceRequestParameter(name, value));
             }
         }
@@ -112,7 +117,7 @@ public class HickeyConfigurationParser {
             for (Iterator<Element> propertyIterator = parametersElement.elementIterator("property"); propertyIterator.hasNext(); ) {
                 Element propertyElement = propertyIterator.next();
                 final String name = propertyElement.attributeValue("name");
-                HickeyValue value = new HickeyValue(hickeyConfiguration.getValuePlaceholder(), propertyElement.getTextTrim());
+                HickeyValue value = new HickeyValue(propertyElement.getTextTrim());
                 form.addFormParameter(new RemoteInterfaceRequestFormProperty(name, value));
             }
             request.setForm(form);

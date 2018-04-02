@@ -1,20 +1,22 @@
 package com.github.developframework.hickey.core;
 
 import com.github.developframework.hickey.core.bodyprovider.BodyProvider;
-import com.github.developframework.hickey.core.element.RemoteInterface;
-import com.github.developframework.hickey.core.element.RemoteInterfaceRequest;
-import com.github.developframework.hickey.core.element.RemoteInterfaceRequestBody;
-import com.github.developframework.hickey.core.element.RemoteInterfaceRequestForm;
+import com.github.developframework.hickey.core.element.*;
 import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.hickey.core.parse.HickeyConfigurationParser;
 import com.github.developframework.kite.core.exception.KiteParseXmlException;
 import com.github.developframework.toolkit.http.HttpHeader;
 import com.github.developframework.toolkit.http.ToolkitHttpClient;
 import com.github.developframework.toolkit.http.request.*;
+import com.github.developframework.toolkit.http.response.HttpResponse;
+import com.github.developframework.toolkit.http.response.HttpResponseBody;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Hickey终端
@@ -58,6 +60,7 @@ public class HickeyTerminal {
         for (HickeyConfigurationSource source : sources) {
             try {
                 hickeyConfigurationParser.parse(source);
+                log.info("Hickey loaded source {}.", source.getSourceName());
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new KiteParseXmlException("Hickey Framework parse configuration source \"%s\" happened error: %s", source.getSourceName(), e.getMessage());
@@ -65,11 +68,22 @@ public class HickeyTerminal {
         }
     }
 
-    public void touch(String interfaceId, Object data) {
-        final RemoteInterface remoteInterface = hickeyConfiguration.extractRemoteInterface(interfaceId);
+    /**
+     * 尝试请求
+     * @param groupName 接口组名称
+     * @param interfaceId 接口id
+     * @param data 数据包
+     * @param responseBodyClass 响应体处理类
+     * @return 响应体
+     * @throws IOException
+     */
+    public <T extends HttpResponseBody> HttpResponse<T> touch(String groupName, String interfaceId, Object data, Class<T> responseBodyClass) throws IOException{
+        final RemoteInterfaceGroup remoteInterfaceGroup = hickeyConfiguration.getRemoteInterfaceGroup(groupName);
+        final RemoteInterface remoteInterface = remoteInterfaceGroup.extractRemoteInterface(interfaceId);
         RemoteInterfaceRequest interfaceRequest = remoteInterface.getInterfaceRequest();
-        HttpRequest httpRequest = initializeHttpRequest(interfaceRequest, data);
+        HttpRequest httpRequest = initializeHttpRequest(remoteInterfaceGroup, interfaceRequest, data);
         debugShowRequestInfo(interfaceRequest, httpRequest);
+        return client.request(interfaceRequest.getMethod(), httpRequest, responseBodyClass);
     }
 
     /**
@@ -81,7 +95,7 @@ public class HickeyTerminal {
     private void debugShowRequestInfo(RemoteInterfaceRequest interfaceRequest, HttpRequest httpRequest) {
         StringBuffer sb = new StringBuffer();
         sb
-                .append("【Request】: \n\n")
+                .append("【Request】: \n")
                 .append("url: ").append(httpRequest.getUrl()).append('\n')
                 .append("method: ").append(interfaceRequest.getMethod()).append('\n')
                 .append("charset: ").append(httpRequest.getCharset()).append('\n')
@@ -93,20 +107,29 @@ public class HickeyTerminal {
         for (HttpUrlParameter httpUrlParameter : httpRequest.getUrlParameters()) {
             sb.append(httpUrlParameter.getParameterName()).append(": ").append(httpUrlParameter.getValue()).append('\n');
         }
-        sb.append("body: \n");
-        String body = new String(httpRequest.getBody().serializeBody(httpRequest.getCharset()), httpRequest.getCharset());
-        sb.append(body).append('\n');
+        if(httpRequest.hasBody()) {
+            sb.append("body: \n");
+            String body = new String(httpRequest.getBody().serializeBody(httpRequest.getCharset()), httpRequest.getCharset());
+            sb.append(body).append('\n');
+        }
         System.out.println(sb.toString());
     }
 
     /**
      * 初始化请求体
      *
+     * @param remoteInterfaceGroup
      * @param interfaceRequest
      * @return
      */
-    private HttpRequest initializeHttpRequest(RemoteInterfaceRequest interfaceRequest, final Object data) {
-        final HttpRequest httpRequest = new HttpRequest(interfaceRequest.getUrl());
+    private HttpRequest initializeHttpRequest(RemoteInterfaceGroup remoteInterfaceGroup, RemoteInterfaceRequest interfaceRequest, final Object data) {
+        final String url = interfaceRequest.getUrl().getValue(data);
+        final String urlFull = remoteInterfaceGroup.getDomainPrefix() == null ? url : (
+                url.startsWith("/") ? (
+                      remoteInterfaceGroup.getDomainPrefix() + url) : (remoteInterfaceGroup.getDomainPrefix() + "/" + url
+              )
+        );
+        final HttpRequest httpRequest = new HttpRequest(urlFull);
 
         // 处理parameter
         interfaceRequest.getParameters().forEach(parameter -> {

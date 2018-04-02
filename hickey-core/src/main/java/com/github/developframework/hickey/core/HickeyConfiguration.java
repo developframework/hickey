@@ -3,10 +3,8 @@ package com.github.developframework.hickey.core;
 import com.github.developframework.hickey.core.bodyprovider.BodyProvider;
 import com.github.developframework.hickey.core.bodyprovider.DefaultBodyProvider;
 import com.github.developframework.hickey.core.bodyprovider.KiteBodyProvider;
-import com.github.developframework.hickey.core.element.RemoteInterface;
-import com.github.developframework.hickey.core.exception.InterfaceExistException;
-import com.github.developframework.hickey.core.exception.InterfaceUndefinedException;
-import com.github.developframework.hickey.core.value.ValuePlaceholder;
+import com.github.developframework.hickey.core.element.RemoteInterfaceGroup;
+import com.github.developframework.hickey.core.exception.GroupUndefinedException;
 import com.github.developframework.kite.core.KiteFactory;
 import lombok.Getter;
 
@@ -20,10 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HickeyConfiguration {
 
-    private Map<String, RemoteInterface> remoteInterfaceMap = new ConcurrentHashMap<>();
-
-    @Getter
-    private ValuePlaceholder valuePlaceholder = new ValuePlaceholder();
+    private Map<String, RemoteInterfaceGroup> remoteInterfaceGroupMap = new ConcurrentHashMap<>();
 
     @Getter
     private List<BodyProvider> bodyProviders = new LinkedList<>();
@@ -45,7 +40,7 @@ public class HickeyConfiguration {
 
     /**
      * 初始化Kite
-     * @param kiteConfigs
+     * @param kiteConfigs 配置文件路径
      */
     public void initializeKite(String... kiteConfigs) {
         kiteFactory = new KiteFactory(kiteConfigs);
@@ -53,29 +48,30 @@ public class HickeyConfiguration {
     }
 
     /**
-     * 增加远程接口配置
-     * @param remoteInterface
+     * 添加接口组
+     * @param remoteInterfaceGroupName 接口组名称
+     * @return 接口组
      */
-    public void addRemoteInterface(RemoteInterface remoteInterface) {
-        if(remoteInterfaceMap.containsKey(remoteInterface.getId())) {
-            throw new InterfaceExistException(remoteInterface.getId());
+    public RemoteInterfaceGroup addRemoteInterfaceGroup(String remoteInterfaceGroupName) {
+        if(remoteInterfaceGroupMap.containsKey(remoteInterfaceGroupName)) {
+            return remoteInterfaceGroupMap.get(remoteInterfaceGroupName);
         } else {
-            remoteInterfaceMap.put(remoteInterface.getId(), remoteInterface);
+            RemoteInterfaceGroup remoteInterfaceGroup = new RemoteInterfaceGroup(remoteInterfaceGroupName);
+            remoteInterfaceGroupMap.put(remoteInterfaceGroupName, remoteInterfaceGroup);
+            return remoteInterfaceGroup;
         }
     }
 
     /**
-     * 提取远程接口配置
-     * @param interfaceId
+     * 获得接口组
+     * @param remoteInterfaceGroupName
      * @return
      */
-    public RemoteInterface extractRemoteInterface(String interfaceId) {
-        if(remoteInterfaceMap.containsKey(interfaceId)) {
-            return remoteInterfaceMap.get(interfaceId);
+    public RemoteInterfaceGroup getRemoteInterfaceGroup(String remoteInterfaceGroupName) {
+        if(remoteInterfaceGroupMap.containsKey(remoteInterfaceGroupName)) {
+            return remoteInterfaceGroupMap.get(remoteInterfaceGroupName);
         } else {
-            throw new InterfaceUndefinedException(interfaceId);
+            throw new GroupUndefinedException(remoteInterfaceGroupName);
         }
     }
-
-
 }

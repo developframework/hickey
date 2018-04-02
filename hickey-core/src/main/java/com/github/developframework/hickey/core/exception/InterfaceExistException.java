@@ -1,7 +1,7 @@
 package com.github.developframework.hickey.core.exception;
 
 /**
- * 资源定义不唯一异常
+ * 接口定义不唯一异常
  * @author qiuzhenhao
  */
 public class InterfaceExistException extends HickeyException {

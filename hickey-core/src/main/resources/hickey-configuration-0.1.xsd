@@ -8,17 +8,18 @@
                 <xs:element name="remote-interfaces">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="domain-prefix" type="xs:string"/>
+                            <xs:element name="domain-prefix" type="xs:string" minOccurs="0"/>
                             <xs:element name="remote-interface" minOccurs="0" maxOccurs="unbounded">
                                 <xs:complexType>
                                     <xs:sequence>
                                         <xs:element name="request" type="request"/>
-                                        <xs:element name="response" type="response"/>
+                                        <!--<xs:element name="response" type="response"/>-->
                                     </xs:sequence>
                                     <xs:attribute name="id" use="required"/>
                                 </xs:complexType>
                             </xs:element>
                         </xs:sequence>
+                        <xs:attribute name="group-name" type="xs:string" use="required"></xs:attribute>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>

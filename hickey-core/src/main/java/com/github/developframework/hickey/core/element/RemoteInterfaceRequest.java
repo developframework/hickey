@@ -1,5 +1,6 @@
 package com.github.developframework.hickey.core.element;
 
+import com.github.developframework.hickey.core.value.HickeyValue;
 import com.github.developframework.toolkit.http.HttpMethod;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,7 @@ import java.util.List;
 @Getter
 public class RemoteInterfaceRequest {
 
-    private String url;
+    private HickeyValue url;
 
     private HttpMethod method;
 
@@ -31,7 +32,7 @@ public class RemoteInterfaceRequest {
     private RemoteInterfaceRequestBody body;
 
     public RemoteInterfaceRequest(String url, HttpMethod method) {
-        this.url = url;
+        this.url = new HickeyValue(url);
         this.method = method;
     }
 

@@ -9,6 +9,8 @@ import lombok.Setter;
 @Getter
 public class RemoteInterface {
 
+    private String groupName;
+
     private String id;
 
     @Setter
@@ -16,7 +18,8 @@ public class RemoteInterface {
     @Setter
     private InterfaceResponse interfaceResponse;
 
-    public RemoteInterface(String id) {
+    public RemoteInterface(String groupName, String id) {
+        this.groupName = groupName;
         this.id = id;
     }
 }

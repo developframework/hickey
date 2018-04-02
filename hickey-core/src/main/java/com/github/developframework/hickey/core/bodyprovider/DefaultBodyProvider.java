@@ -19,11 +19,11 @@ public class DefaultBodyProvider implements BodyProvider {
 
     @Override
     public void parseHandle(HickeyConfiguration hickeyConfiguration, RemoteInterfaceRequestBody requestBody, Element element) {
-        value = new HickeyValue(hickeyConfiguration.getValuePlaceholder(), element.getTextTrim());
+        value = new HickeyValue(element.getTextTrim());
     }
 
     @Override
     public String provide(Object data) {
-        return value.getValue(data).toString();
+        return value.getValue(data);
     }
 }

@@ -7,20 +7,17 @@
 
         <domain-prefix>http://localhost:8080</domain-prefix>
 
-        <remote-interface id="interface-add-student">
+        <remote-interface id="interface-delete-student">
 
-            <request method="POST">
-                <url>/students</url>
+            <request method="DELETE">
+                <url>/students/@{id}</url>
                 <parameters>
                     <parameter name="other_param">@{otherParam}</parameter>
                 </parameters>
-                <description>添加学生接口</description>
-                <headers>
-                    <header name="Content-Type">application/json</header>
-                </headers>
-                <body type="JSON">
+                <description>删除学生接口</description>
+                <body type="TEXT">
                     <provider>
-                        <kite-provider namespace="kite-student" template-id="student-detail"/>
+                        <default-provider>xxxxxx@{id}</default-provider>
                     </provider>
                 </body>
             </request>

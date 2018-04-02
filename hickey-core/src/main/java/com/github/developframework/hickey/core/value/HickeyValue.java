@@ -1,23 +1,37 @@
 package com.github.developframework.hickey.core.value;
 
+import com.github.developframework.expression.ExpressionUtils;
+import com.github.developframework.hickey.core.exception.HickeyValueException;
+import com.github.developframework.toolkit.base.Sugar;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author qiuzhenhao
  */
 public class HickeyValue {
 
-    private ValuePlaceholder valuePlaceholder;
-
     private String targetValue;
 
-    public HickeyValue(ValuePlaceholder valuePlaceholder, String targetValue) {
-        this.valuePlaceholder = valuePlaceholder;
+    public HickeyValue(String targetValue) {
         this.targetValue = targetValue;
     }
 
-    public Object getValue(Object data) {
-        if (valuePlaceholder.hasPlaceholder(targetValue)) {
-            return valuePlaceholder.replace(data, targetValue);
+    public String getValue(Object data) {
+        Pattern pattern = Pattern.compile("@\\{.+?\\}");
+        Matcher matcher = pattern.matcher(targetValue);
+        String result = targetValue;
+        while (matcher.find()) {
+            String matchString = matcher.group();
+            String matchValue = getExpressionString(matchString);
+            Object value = ExpressionUtils.getValue(data, matchValue);
+            result = result.replace(matchString, Sugar.use(value, new HickeyValueException(matchValue)).toString());
         }
-        return targetValue;
+        return result;
+    }
+
+    private String getExpressionString(String targetValue) {
+        return targetValue.substring(2, targetValue.length() - 1);
     }
 }
