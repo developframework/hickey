@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Setter;
 
 /**
+ * 远程接口表单属性
  * @author qiuzhenhao
  */
 @AllArgsConstructor

@@ -7,6 +7,6 @@ package com.github.developframework.hickey.core.exception;
 public class ConfigurationSourceException extends HickeyException {
 
     public ConfigurationSourceException(String source) {
-        super("The hickey configuration source \"\" is not found.", source);
+        super("The hickey configuration source \"%s\" is not found.", source);
     }
 }

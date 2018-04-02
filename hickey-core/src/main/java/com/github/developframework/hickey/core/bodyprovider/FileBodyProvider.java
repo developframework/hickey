@@ -5,6 +5,7 @@ import com.github.developframework.hickey.core.element.RemoteInterfaceRequestBod
 import org.dom4j.Element;
 
 /**
+ * 处理文件的请求内容提供者
  * @author qiuzhenhao
  */
 public class FileBodyProvider implements BodyProvider {

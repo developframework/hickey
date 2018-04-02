@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * 远程接口请求表单
  * @author qiuzhenhao
  */
 @Getter

@@ -10,6 +10,7 @@ import com.github.developframework.kite.core.data.HashDataModel;
 import org.dom4j.Element;
 
 /**
+ * 使用Kite的请求内容提供者
  * @author qiuzhenhao
  */
 public class KiteBodyProvider implements BodyProvider {

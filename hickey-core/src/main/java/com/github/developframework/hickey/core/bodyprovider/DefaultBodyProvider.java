@@ -6,6 +6,8 @@ import com.github.developframework.hickey.core.value.HickeyValue;
 import org.dom4j.Element;
 
 /**
+ * 默认的请求内容提供者
+ * <default-provider>
  * @author qiuzhenhao
  */
 public class DefaultBodyProvider implements BodyProvider {

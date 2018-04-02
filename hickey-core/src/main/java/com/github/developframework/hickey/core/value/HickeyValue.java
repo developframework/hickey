@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 可替换值对象
  * @author qiuzhenhao
  */
 public class HickeyValue {

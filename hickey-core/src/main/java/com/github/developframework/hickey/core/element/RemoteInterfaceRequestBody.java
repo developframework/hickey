@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * 远程接口请求Body
  * @author qiuzhenhao
  */
 @Getter

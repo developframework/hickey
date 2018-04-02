@@ -9,15 +9,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 远程接口分组
  * @author qiuzhenhao
  */
 public class RemoteInterfaceGroup {
 
     private Map<String, RemoteInterface> remoteInterfaceMap = new ConcurrentHashMap<>();
 
+    /* 分组名称 */
     @Getter
     private String groupName;
 
+    /* 域名前缀 */
     @Setter
     @Getter
     private String domainPrefix;

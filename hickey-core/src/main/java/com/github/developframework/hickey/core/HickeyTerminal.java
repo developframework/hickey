@@ -3,17 +3,18 @@ package com.github.developframework.hickey.core;
 import com.github.developframework.hickey.core.bodyprovider.BodyProvider;
 import com.github.developframework.hickey.core.element.*;
 import com.github.developframework.hickey.core.exception.HickeyException;
+import com.github.developframework.hickey.core.exception.HickeyRequestFailException;
 import com.github.developframework.hickey.core.parse.HickeyConfigurationParser;
 import com.github.developframework.kite.core.exception.KiteParseXmlException;
 import com.github.developframework.toolkit.http.HttpHeader;
 import com.github.developframework.toolkit.http.ToolkitHttpClient;
 import com.github.developframework.toolkit.http.request.*;
 import com.github.developframework.toolkit.http.response.HttpResponse;
-import com.github.developframework.toolkit.http.response.HttpResponseBody;
+import com.github.developframework.toolkit.http.response.HttpResponseBodyProcessor;
+import com.github.developframework.toolkit.http.response.SimpleHttpResponseBodyProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -73,17 +74,26 @@ public class HickeyTerminal {
      * @param groupName 接口组名称
      * @param interfaceId 接口id
      * @param data 数据包
-     * @param responseBodyClass 响应体处理类
+     * @param responseBodyProcessorClass 响应体处理类
      * @return 响应体
-     * @throws IOException
      */
-    public <T extends HttpResponseBody> HttpResponse<T> touch(String groupName, String interfaceId, Object data, Class<T> responseBodyClass) throws IOException{
+    public <T extends HttpResponseBodyProcessor<?, ?>> HttpResponse<T> touch(String groupName, String interfaceId, Object data, Class<T> responseBodyProcessorClass){
         final RemoteInterfaceGroup remoteInterfaceGroup = hickeyConfiguration.getRemoteInterfaceGroup(groupName);
         final RemoteInterface remoteInterface = remoteInterfaceGroup.extractRemoteInterface(interfaceId);
         RemoteInterfaceRequest interfaceRequest = remoteInterface.getInterfaceRequest();
         HttpRequest httpRequest = initializeHttpRequest(remoteInterfaceGroup, interfaceRequest, data);
         debugShowRequestInfo(interfaceRequest, httpRequest);
-        return client.request(interfaceRequest.getMethod(), httpRequest, responseBodyClass);
+
+        try {
+            HttpResponse<T> response = client.request(interfaceRequest.getMethod(), httpRequest, responseBodyProcessorClass);
+            return response;
+        } catch (Exception e) {
+            throw new HickeyRequestFailException(e.getMessage());
+        }
+    }
+
+    public HttpResponse<SimpleHttpResponseBodyProcessor> touch(String groupName, String interfaceId, Object data){
+        return touch(groupName, interfaceId, data, SimpleHttpResponseBodyProcessor.class);
     }
 
     /**

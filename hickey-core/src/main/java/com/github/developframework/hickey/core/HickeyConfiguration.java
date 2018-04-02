@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 总配置
  * @author qiuzhenhao
  */
 public class HickeyConfiguration {

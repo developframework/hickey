@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * 配置源
  * @author qiuzhenhao
  */
 public interface HickeyConfigurationSource {
