@@ -103,26 +103,28 @@ public class HickeyTerminal {
      * @param httpRequest
      */
     private void debugShowRequestInfo(RemoteInterfaceRequest interfaceRequest, HttpRequest httpRequest) {
-        StringBuffer sb = new StringBuffer();
-        sb
-                .append("【Request】: \n")
-                .append("url: ").append(httpRequest.getUrl()).append('\n')
-                .append("method: ").append(interfaceRequest.getMethod()).append('\n')
-                .append("charset: ").append(httpRequest.getCharset()).append('\n')
-                .append("header: \n");
-        for (HttpHeader httpHeader : httpRequest.getHeaders()) {
-            sb.append(httpHeader.getHeaderName()).append(": ").append(httpHeader.getValue()).append('\n');
+        if(log.isDebugEnabled()) {
+            StringBuffer sb = new StringBuffer();
+            sb
+                    .append("【Request】: \n")
+                    .append("url: ").append(httpRequest.getUrl()).append('\n')
+                    .append("method: ").append(interfaceRequest.getMethod()).append('\n')
+                    .append("charset: ").append(httpRequest.getCharset()).append('\n')
+                    .append("header: \n");
+            for (HttpHeader httpHeader : httpRequest.getHeaders()) {
+                sb.append(httpHeader.getHeaderName()).append(": ").append(httpHeader.getValue()).append('\n');
+            }
+            sb.append("parameter: \n");
+            for (HttpUrlParameter httpUrlParameter : httpRequest.getUrlParameters()) {
+                sb.append(httpUrlParameter.getParameterName()).append(": ").append(httpUrlParameter.getValue()).append('\n');
+            }
+            if (httpRequest.hasBody()) {
+                sb.append("body: \n");
+                String body = new String(httpRequest.getBody().serializeBody(httpRequest.getCharset()), httpRequest.getCharset());
+                sb.append(body).append('\n');
+            }
+            log.debug(sb.toString());
         }
-        sb.append("parameter: \n");
-        for (HttpUrlParameter httpUrlParameter : httpRequest.getUrlParameters()) {
-            sb.append(httpUrlParameter.getParameterName()).append(": ").append(httpUrlParameter.getValue()).append('\n');
-        }
-        if(httpRequest.hasBody()) {
-            sb.append("body: \n");
-            String body = new String(httpRequest.getBody().serializeBody(httpRequest.getCharset()), httpRequest.getCharset());
-            sb.append(body).append('\n');
-        }
-        System.out.println(sb.toString());
     }
 
     /**
