@@ -1,4 +1,4 @@
-## Hickey
+# Hickey
 
 Hickey是一个可配置请求信息的Http发送器。
 
@@ -10,7 +10,7 @@ Hickey是一个可配置请求信息的Http发送器。
 </dependency>
 ```
 
-#### 0. 介绍
+### 0. 介绍
 
 通过hickey的xml配置文件描述请求信息，xml基本格式如下：
 
@@ -58,7 +58,7 @@ Hickey是一个可配置请求信息的Http发送器。
 + 每份xml配置文件中可配置多个`<remote-interfaces>`，每个`<remote-interfaces>`中可以配置多个`<remote-interface>`。并且Hickey框架可以设置多份xml配置文件。
 + 其中的`<form>` 和`<body>`不能共存，只能选其一使用。
 
-#### 1. 最简示例
+### 1. 最简示例
 
 hickey-demo.xml :
 
@@ -106,9 +106,9 @@ null: HTTP/1.1 200
 {"id":1,"name":"Peter"}
 ```
 
-#### 2. 功能
+### 2. 功能
 
-##### 2.1 值替换@{} 
+#### 2.1 值替换@{} 
 
 xml配置文件可以使用@{xxx}符号获取传入数据。
 
@@ -139,7 +139,7 @@ hickeyTerminal.touch("", "", data);
 
 @{xxx.yyy} 符号内的取值表达式实现于独立项目[expression](https://github.com/developframework/expression)
 
-##### 2.2 body内容提供器
+#### 2.2 body内容提供器
 
 Hickey内置两种内容提供器：
 
@@ -198,7 +198,7 @@ hickeyTerminal.getHickeyConfiguration().addBodyProvider(myBodyProvider);
 hickeyTerminal.start();
 ```
 
-##### 2.3 对Http发送器设置
+#### 2.3 对Http发送器设置
 
 ```java
 Option option = hickeyTerminal.getClient().getOption();
@@ -210,7 +210,7 @@ option.setConnectTimeout(10000);
 option.setReadTimeout(10000);
 ```
 
-##### 2.4 请求响应内容的处理
+#### 2.4 请求响应内容的处理
 
 Hickey内置默认的处理器`SimpleHttpResponseBodyProcessor`，实现对响应内容转成文本。
 
