@@ -34,6 +34,7 @@ public class HickeyConfigurationParser {
         Document document = reader.read(hickeyConfigurationSource.getInputStream());
         Element hickeyConfigurationElement = document.getRootElement();
         parseRemoteInterfaceCollectionElement(hickeyConfigurationElement);
+
     }
 
     /**
@@ -43,16 +44,18 @@ public class HickeyConfigurationParser {
      */
     @SuppressWarnings("unchecked")
     private void parseRemoteInterfaceCollectionElement(Element hickeyConfigurationElement) {
-        Element remoteInterfacesElement = hickeyConfigurationElement.element("remote-interfaces");
-        final String groupName = remoteInterfacesElement.attributeValue("group-name");
-        final RemoteInterfaceGroup group = hickeyConfiguration.addRemoteInterfaceGroup(groupName);
-        Element domainPrefixElement = remoteInterfacesElement.element("domain-prefix");
-        if(domainPrefixElement != null) {
-            group.setDomainPrefix(domainPrefixElement.getTextTrim());
-        }
-        for (Iterator<Element> remoteInterfacesIterator = remoteInterfacesElement.elementIterator("remote-interface"); remoteInterfacesIterator.hasNext(); ) {
-            Element remoteInterfaceElement = remoteInterfacesIterator.next();
-            parseRemoteInterfaceElement(group, remoteInterfaceElement);
+        for(Iterator<Element> iterator = hickeyConfigurationElement.elementIterator("remote-interfaces"); iterator.hasNext();) {
+            Element remoteInterfacesElement = iterator.next();
+            final String groupName = remoteInterfacesElement.attributeValue("group-name");
+            final RemoteInterfaceGroup group = hickeyConfiguration.addRemoteInterfaceGroup(groupName);
+            Element domainPrefixElement = remoteInterfacesElement.element("domain-prefix");
+            if (domainPrefixElement != null) {
+                group.setDomainPrefix(domainPrefixElement.getTextTrim());
+            }
+            for (Iterator<Element> remoteInterfacesIterator = remoteInterfacesElement.elementIterator("remote-interface"); remoteInterfacesIterator.hasNext(); ) {
+                Element remoteInterfaceElement = remoteInterfacesIterator.next();
+                parseRemoteInterfaceElement(group, remoteInterfaceElement);
+            }
         }
     }
 

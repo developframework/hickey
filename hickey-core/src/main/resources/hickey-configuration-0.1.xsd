@@ -5,7 +5,7 @@
     <xs:element name="hickey-configuration">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="remote-interfaces">
+                <xs:element name="remote-interfaces" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:element name="domain-prefix" type="xs:string" minOccurs="0"/>
@@ -13,7 +13,6 @@
                                 <xs:complexType>
                                     <xs:sequence>
                                         <xs:element name="request" type="request"/>
-                                        <!--<xs:element name="response" type="response"/>-->
                                     </xs:sequence>
                                     <xs:attribute name="id" use="required"/>
                                 </xs:complexType>
@@ -132,11 +131,5 @@
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
-    </xs:complexType>
-
-    <xs:complexType name="response">
-        <xs:sequence>
-            <xs:element name="body"></xs:element>
-        </xs:sequence>
     </xs:complexType>
 </xs:schema>

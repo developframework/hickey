@@ -34,6 +34,8 @@ public class HickeyTerminal {
 
     private Set<HickeyConfigurationSource> sources;
 
+    private boolean isStart;
+
     public HickeyTerminal(String... configs) {
         Objects.requireNonNull(configs);
         this.sources = new HashSet<>();
@@ -52,11 +54,19 @@ public class HickeyTerminal {
      * @param configs
      */
     public void useKite(String... configs) {
+        if(isStart) {
+            log.warn("Hickey is running.");
+            return;
+        }
         hickeyConfiguration.initializeKite(configs);
     }
 
 
-    public void start() {
+    public synchronized void start() {
+        if(isStart) {
+            log.warn("Hickey is running.");
+            return;
+        }
         HickeyConfigurationParser hickeyConfigurationParser = new HickeyConfigurationParser(hickeyConfiguration);
         for (HickeyConfigurationSource source : sources) {
             try {
@@ -67,6 +77,7 @@ public class HickeyTerminal {
                 throw new KiteParseXmlException("Hickey Framework parse configuration source \"%s\" happened error: %s", source.getSourceName(), e.getMessage());
             }
         }
+        isStart = true;
     }
 
     /**
@@ -78,6 +89,9 @@ public class HickeyTerminal {
      * @return 响应体
      */
     public <T extends HttpResponseBodyProcessor<?, ?>> HttpResponse<T> touch(String groupName, String interfaceId, Object data, Class<T> responseBodyProcessorClass){
+        if(!isStart) {
+            throw new HickeyException("Hickey is not running, please invoke start() first.");
+        }
         final RemoteInterfaceGroup remoteInterfaceGroup = hickeyConfiguration.getRemoteInterfaceGroup(groupName);
         final RemoteInterface remoteInterface = remoteInterfaceGroup.extractRemoteInterface(interfaceId);
         RemoteInterfaceRequest interfaceRequest = remoteInterface.getInterfaceRequest();
@@ -103,7 +117,7 @@ public class HickeyTerminal {
      * @param httpRequest
      */
     private void debugShowRequestInfo(RemoteInterfaceRequest interfaceRequest, HttpRequest httpRequest) {
-        if(log.isDebugEnabled()) {
+        if(log.isInfoEnabled()) {
             StringBuffer sb = new StringBuffer();
             sb
                     .append("【Request】: \n")
@@ -123,7 +137,7 @@ public class HickeyTerminal {
                 String body = new String(httpRequest.getBody().serializeBody(httpRequest.getCharset()), httpRequest.getCharset());
                 sb.append(body).append('\n');
             }
-            log.debug(sb.toString());
+            log.info(sb.toString());
         }
     }
 

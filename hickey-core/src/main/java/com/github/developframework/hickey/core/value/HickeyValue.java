@@ -2,7 +2,7 @@ package com.github.developframework.hickey.core.value;
 
 import com.github.developframework.expression.ExpressionUtils;
 import com.github.developframework.hickey.core.exception.HickeyValueException;
-import com.github.developframework.toolkit.base.Sugar;
+import com.github.developframework.toolkit.base.Toolkit;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,10 +24,11 @@ public class HickeyValue {
         Matcher matcher = pattern.matcher(targetValue);
         String result = targetValue;
         while (matcher.find()) {
+            Toolkit.assistExist(data, new HickeyValueException("Data is null."));
             String matchString = matcher.group();
             String matchValue = getExpressionString(matchString);
             Object value = ExpressionUtils.getValue(data, matchValue);
-            result = result.replace(matchString, Sugar.use(value, new HickeyValueException(matchValue)).toString());
+            result = result.replace(matchString, Toolkit.use(value, new HickeyValueException(matchValue)).toString());
         }
         return result;
     }

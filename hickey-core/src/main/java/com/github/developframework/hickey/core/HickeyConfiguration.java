@@ -36,7 +36,14 @@ public class HickeyConfiguration {
      */
     private void registerDefaultBodyProvider() {
         bodyProviders.add(new DefaultBodyProvider());
+    }
 
+    /**
+     * 添加BodyProvider
+     * @param bodyProvider
+     */
+    public void addBodyProvider(BodyProvider bodyProvider) {
+        bodyProviders.add(bodyProvider);
     }
 
     /**
