@@ -143,7 +143,7 @@ hickeyTerminal.touch("", "", data);
 
 Hickey内置两种内容提供器：
 
-+ `<default-provider>` 默认的提供器
++ `<default-provider>` 默认的提供器，配置的文本作为内容
 
 ```xml
 <body type="TEXT">
@@ -163,6 +163,11 @@ Hickey内置两种内容提供器：
         <kite-provider namespace="kite-student" template-id="student-detail"/>
     </provider>
 </body>
+```
+
+```java
+// 开启使用Kite功能
+hickeyTerminal.useKite("kite-config1.xml", "kite-config2.xml");
 ```
 
 关于Kite的配置请查阅  [Kite](https://github.com/developframework/kite)

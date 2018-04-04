@@ -12,4 +12,6 @@ import org.springframework.stereotype.Component;
 public class HickeyProperties {
 
     private String locations = "classpath*:hickey/*.xml";
+
+    private boolean useKite = true;
 }

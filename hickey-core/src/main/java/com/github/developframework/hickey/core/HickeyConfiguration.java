@@ -7,6 +7,7 @@ import com.github.developframework.hickey.core.element.RemoteInterfaceGroup;
 import com.github.developframework.hickey.core.exception.GroupUndefinedException;
 import com.github.developframework.kite.core.KiteFactory;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -52,6 +53,15 @@ public class HickeyConfiguration {
      */
     public void initializeKite(String... kiteConfigs) {
         kiteFactory = new KiteFactory(kiteConfigs);
+        bodyProviders.add(new KiteBodyProvider());
+    }
+
+    /**
+     * 设置存在的KiteFactory
+     * @param kiteFactory
+     */
+    public void setKiteFactory(KiteFactory kiteFactory) {
+        this.kiteFactory = kiteFactory;
         bodyProviders.add(new KiteBodyProvider());
     }
 

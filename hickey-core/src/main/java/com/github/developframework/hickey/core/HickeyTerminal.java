@@ -5,6 +5,7 @@ import com.github.developframework.hickey.core.element.*;
 import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.hickey.core.exception.HickeyRequestFailException;
 import com.github.developframework.hickey.core.parse.HickeyConfigurationParser;
+import com.github.developframework.kite.core.KiteFactory;
 import com.github.developframework.kite.core.exception.KiteParseXmlException;
 import com.github.developframework.toolkit.http.HttpHeader;
 import com.github.developframework.toolkit.http.ToolkitHttpClient;
@@ -59,6 +60,18 @@ public class HickeyTerminal {
             return;
         }
         hickeyConfiguration.initializeKite(configs);
+    }
+
+    /**
+     * 开启使用Kite
+     * @param kiteFactory
+     */
+    public void useKite(KiteFactory kiteFactory) {
+        if(isStart) {
+            log.warn("Hickey is running.");
+            return;
+        }
+        hickeyConfiguration.setKiteFactory(kiteFactory);
     }
 
 
@@ -117,27 +130,31 @@ public class HickeyTerminal {
      * @param httpRequest
      */
     private void debugShowRequestInfo(RemoteInterfaceRequest interfaceRequest, HttpRequest httpRequest) {
-        if(log.isInfoEnabled()) {
+        if(log.isDebugEnabled()) {
             StringBuffer sb = new StringBuffer();
             sb
-                    .append("【Request】: \n")
-                    .append("url: ").append(httpRequest.getUrl()).append('\n')
-                    .append("method: ").append(interfaceRequest.getMethod()).append('\n')
-                    .append("charset: ").append(httpRequest.getCharset()).append('\n')
-                    .append("header: \n");
-            for (HttpHeader httpHeader : httpRequest.getHeaders()) {
-                sb.append(httpHeader.getHeaderName()).append(": ").append(httpHeader.getValue()).append('\n');
+                .append("\n【Hickey Debug】: \n")
+                .append("url: ").append(httpRequest.getUrl()).append('\n')
+                .append("method: ").append(interfaceRequest.getMethod()).append('\n')
+                .append("charset: ").append(httpRequest.getCharset()).append('\n');
+            if(!httpRequest.getHeaders().isEmpty()) {
+                sb.append("header: \n");
+                for (HttpHeader httpHeader : httpRequest.getHeaders()) {
+                    sb.append(httpHeader.getHeaderName()).append(": ").append(httpHeader.getValue()).append('\n');
+                }
             }
-            sb.append("parameter: \n");
-            for (HttpUrlParameter httpUrlParameter : httpRequest.getUrlParameters()) {
-                sb.append(httpUrlParameter.getParameterName()).append(": ").append(httpUrlParameter.getValue()).append('\n');
+            if(!httpRequest.getUrlParameters().isEmpty()) {
+                sb.append("parameter: \n");
+                for (HttpUrlParameter httpUrlParameter : httpRequest.getUrlParameters()) {
+                    sb.append(httpUrlParameter.getParameterName()).append(": ").append(httpUrlParameter.getValue()).append('\n');
+                }
             }
             if (httpRequest.hasBody()) {
                 sb.append("body: \n");
                 String body = new String(httpRequest.getBody().serializeBody(httpRequest.getCharset()), httpRequest.getCharset());
                 sb.append(body).append('\n');
             }
-            log.info(sb.toString());
+            log.debug(sb.toString());
         }
     }
 

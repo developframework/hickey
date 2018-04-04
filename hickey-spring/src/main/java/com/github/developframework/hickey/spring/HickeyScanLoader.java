@@ -43,9 +43,7 @@ public class HickeyScanLoader {
                 final Resource[] resources = resolver.getResources(locationOne);
                 Arrays.stream(resources).map(SpringResourceHickeyConfigurationSource::new).forEach(sources::add);
             }
-            HickeyTerminal hickeyTerminal = new HickeyTerminal(sources);
-            hickeyTerminal.start();
-            return hickeyTerminal;
+            return new HickeyTerminal(sources);
         } catch (IOException e) {
             throw new HickeyException("Happen IOException when Spring ResourcePatternResolver get resource: %s", e.getMessage());
         }
