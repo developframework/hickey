@@ -14,4 +14,8 @@ public class HickeyProperties {
     private String locations = "classpath*:hickey/*.xml";
 
     private boolean useKite = true;
+
+    private int connectTimeout = 5000;
+
+    private int readTimeout = 5000;
 }

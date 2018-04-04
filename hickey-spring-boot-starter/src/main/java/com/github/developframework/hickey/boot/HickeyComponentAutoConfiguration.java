@@ -24,8 +24,7 @@ public class HickeyComponentAutoConfiguration {
     @Bean
     @ConditionalOnBean(KiteFactory.class)
     public HickeyTerminal hickeyTerminal(HickeyProperties hickeyProperties, KiteFactory kiteFactory) {
-        final HickeyScanLoader loader = new HickeyScanLoader(hickeyProperties.getLocations());
-        HickeyTerminal hickeyTerminal = loader.createHickeyTerminal();
+        HickeyTerminal hickeyTerminal = scanHickeyTerminal(hickeyProperties);
         if(hickeyProperties.isUseKite()) {
             hickeyTerminal.useKite(kiteFactory);
         }
@@ -36,11 +35,17 @@ public class HickeyComponentAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(KiteFactory.class)
     public HickeyTerminal hickeyTerminal(HickeyProperties hickeyProperties) {
-        final HickeyScanLoader loader = new HickeyScanLoader(hickeyProperties.getLocations());
-        HickeyTerminal hickeyTerminal = loader.createHickeyTerminal();
+        HickeyTerminal hickeyTerminal = scanHickeyTerminal(hickeyProperties);
         hickeyTerminal.start();
         log.info("Hickey is running.");
         return hickeyTerminal;
     }
 
+    private HickeyTerminal scanHickeyTerminal(HickeyProperties hickeyProperties) {
+        final HickeyScanLoader loader = new HickeyScanLoader(hickeyProperties.getLocations());
+        HickeyTerminal hickeyTerminal = loader.createHickeyTerminal();
+        hickeyTerminal.getClient().getOption().setConnectTimeout(hickeyProperties.getConnectTimeout());
+        hickeyTerminal.getClient().getOption().setReadTimeout(hickeyProperties.getReadTimeout());
+        return hickeyTerminal;
+    }
 }
