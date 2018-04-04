@@ -10,6 +10,10 @@ Hickey是一个可配置请求信息的Http发送器。
 </dependency>
 ```
 
+结合spring-boot使用请查阅
+
+[hickey-spring-boot-starter](https://github.com/developframework/hickey/blob/master/README-boot.md)
+
 ### 0. 介绍
 
 通过hickey的xml配置文件描述请求信息，xml基本格式如下：
