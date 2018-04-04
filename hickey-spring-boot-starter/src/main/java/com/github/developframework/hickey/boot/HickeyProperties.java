@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.net.Proxy;
+
 @Component
 @ConfigurationProperties(prefix = "hickey")
 @Getter
@@ -18,4 +20,17 @@ public class HickeyProperties {
     private int connectTimeout = 5000;
 
     private int readTimeout = 5000;
+
+    private ProxyInfo proxy;
+
+    @Getter
+    @Setter
+    public static class ProxyInfo {
+
+        private Proxy.Type type;
+
+        private String host;
+
+        private int port;
+    }
 }
