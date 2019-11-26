@@ -22,6 +22,9 @@
                     </provider>
                 </body>
             </request>
+
+            <response processor="default"/>
+
         </remote-interface>
 
     </remote-interfaces>

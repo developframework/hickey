@@ -7,35 +7,36 @@ import com.github.developframework.hickey.core.exception.HickeyRequestFailExcept
 import com.github.developframework.hickey.core.parse.HickeyConfigurationParser;
 import com.github.developframework.kite.core.KiteFactory;
 import com.github.developframework.kite.core.exception.KiteParseXmlException;
-import com.github.developframework.toolkit.http.HttpHeader;
-import com.github.developframework.toolkit.http.ToolkitHttpClient;
-import com.github.developframework.toolkit.http.request.*;
-import com.github.developframework.toolkit.http.response.HttpResponse;
-import com.github.developframework.toolkit.http.response.HttpResponseBodyProcessor;
-import com.github.developframework.toolkit.http.response.SimpleHttpResponseBodyProcessor;
+import develop.toolkit.http.HttpFailedException;
+import develop.toolkit.http.JDKToolkitHttpClient;
+import develop.toolkit.http.ToolkitHttpClient;
+import develop.toolkit.http.request.HttpRequestData;
+import develop.toolkit.http.request.body.*;
+import develop.toolkit.http.response.DefaultHttpResponseBodyProcessor;
+import develop.toolkit.http.response.HttpResponseData;
+import develop.toolkit.http.response.HttpResponseDataBodyProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Hickey终端
  *
- * @author qiuzhenhao
  */
-@Getter
 @Slf4j
+@Getter
 public class HickeyTerminal {
 
     private HickeyConfiguration hickeyConfiguration = new HickeyConfiguration();
 
-    private ToolkitHttpClient client = new ToolkitHttpClient();
+    private ToolkitHttpClient client = new JDKToolkitHttpClient();
 
     private Set<HickeyConfigurationSource> sources;
 
     private boolean isStart;
+
+    private Map<String, HttpResponseDataBodyProcessor> processors = new HashMap<>();
 
     public HickeyTerminal(String... configs) {
         Objects.requireNonNull(configs);
@@ -43,11 +44,17 @@ public class HickeyTerminal {
         for (String config : configs) {
             sources.add(new FileHickeyConfigurationSource(config));
         }
+        processors.put("default", new DefaultHttpResponseBodyProcessor());
     }
 
     public HickeyTerminal(Set<HickeyConfigurationSource> sources) {
         Objects.requireNonNull(sources);
         this.sources = sources;
+        processors.put("default", new DefaultHttpResponseBodyProcessor());
+    }
+
+    public void addProcessor(String name, HttpResponseDataBodyProcessor processor) {
+        processors.put(name, processor);
     }
 
     /**
@@ -98,60 +105,51 @@ public class HickeyTerminal {
      * @param groupName 接口组名称
      * @param interfaceId 接口id
      * @param data 数据包
-     * @param responseBodyProcessorClass 响应体处理类
      * @return 响应体
      */
-    public <T extends HttpResponseBodyProcessor<?, ?>> HttpResponse<T> touch(String groupName, String interfaceId, Object data, Class<T> responseBodyProcessorClass){
+    @SuppressWarnings("unchecked")
+    public <T, Y> HttpResponseData<T, Y> touch(String groupName, String interfaceId, Object data) {
         if(!isStart) {
-            throw new HickeyException("Hickey is not running, please invoke start() first.");
+            throw new HickeyException("Hickey is not running, please invoke start() first");
         }
         final RemoteInterfaceGroup remoteInterfaceGroup = hickeyConfiguration.getRemoteInterfaceGroup(groupName);
         final RemoteInterface remoteInterface = remoteInterfaceGroup.extractRemoteInterface(interfaceId);
         RemoteInterfaceRequest interfaceRequest = remoteInterface.getInterfaceRequest();
-        HttpRequest httpRequest = initializeHttpRequest(remoteInterfaceGroup, interfaceRequest, data);
-        debugShowRequestInfo(interfaceRequest, httpRequest);
-
+        HttpRequestData httpRequestData = initializeHttpRequest(remoteInterfaceGroup, interfaceRequest, data);
         try {
-            HttpResponse<T> response = client.request(interfaceRequest.getMethod(), httpRequest, responseBodyProcessorClass);
-            return response;
-        } catch (Exception e) {
+            HttpResponseData<T, Y> httpResponseData = client.request(httpRequestData, processors.get(remoteInterface.getInterfaceResponse().getProcessorName()));
+            debugInfo(httpRequestData, httpResponseData);
+            return httpResponseData;
+        } catch (HttpFailedException e) {
             throw new HickeyRequestFailException(e.getMessage());
         }
-    }
-
-    public HttpResponse<SimpleHttpResponseBodyProcessor> touch(String groupName, String interfaceId, Object data){
-        return touch(groupName, interfaceId, data, SimpleHttpResponseBodyProcessor.class);
     }
 
     /**
      * debug显示请求体信息
      *
-     * @param interfaceRequest
-     * @param httpRequest
+     * @param httpRequestData
+     * @param httpResponseData
      */
-    private void debugShowRequestInfo(RemoteInterfaceRequest interfaceRequest, HttpRequest httpRequest) {
+    private void debugInfo(HttpRequestData httpRequestData, HttpResponseData httpResponseData) {
         if(log.isDebugEnabled()) {
             StringBuffer sb = new StringBuffer();
             sb
                 .append("\n【Hickey Debug】: \n")
-                .append("url: ").append(httpRequest.getUrl()).append('\n')
-                .append("method: ").append(interfaceRequest.getMethod()).append('\n')
-                .append("charset: ").append(httpRequest.getCharset()).append('\n');
-            if(!httpRequest.getHeaders().isEmpty()) {
+                    .append("url: ").append(httpRequestData.getUrl()).append('\n')
+                    .append("method: ").append(httpRequestData.getHttpMethod().name()).append('\n')
+                    .append("charset: ").append(httpRequestData.getCharset()).append('\n');
+            if (!httpRequestData.getHeaders().isEmpty()) {
                 sb.append("header: \n");
-                for (HttpHeader httpHeader : httpRequest.getHeaders()) {
-                    sb.append(httpHeader.getHeaderName()).append(": ").append(httpHeader.getValue()).append('\n');
-                }
+                httpRequestData.getHeaders().forEach((k, v) -> sb.append(k).append(": ").append(v).append('\n'));
             }
-            if(!httpRequest.getUrlParameters().isEmpty()) {
+            if (!httpRequestData.getUrlParameters().isEmpty()) {
                 sb.append("parameter: \n");
-                for (HttpUrlParameter httpUrlParameter : httpRequest.getUrlParameters()) {
-                    sb.append(httpUrlParameter.getParameterName()).append(": ").append(httpUrlParameter.getValue()).append('\n');
-                }
+                httpRequestData.getUrlParameters().forEach((k, v) -> sb.append(k).append(": ").append(v).append('\n'));
             }
-            if (httpRequest.hasBody()) {
+            if (httpRequestData.getBody() != null) {
                 sb.append("body: \n");
-                String body = new String(httpRequest.getBody().serializeBody(httpRequest.getCharset()), httpRequest.getCharset());
+                String body = new String(httpRequestData.getBody().serializeBody(httpRequestData.getCharset()), httpRequestData.getCharset());
                 sb.append(body).append('\n');
             }
             log.debug(sb.toString());
@@ -165,38 +163,36 @@ public class HickeyTerminal {
      * @param interfaceRequest
      * @return
      */
-    private HttpRequest initializeHttpRequest(RemoteInterfaceGroup remoteInterfaceGroup, RemoteInterfaceRequest interfaceRequest, final Object data) {
+    private HttpRequestData initializeHttpRequest(RemoteInterfaceGroup remoteInterfaceGroup, RemoteInterfaceRequest interfaceRequest, final Object data) {
         final String url = interfaceRequest.getUrl().getValue(data);
         final String urlFull = remoteInterfaceGroup.getDomainPrefix() == null ? url : (
-                url.startsWith("/") ? (
-                      remoteInterfaceGroup.getDomainPrefix() + url) : (remoteInterfaceGroup.getDomainPrefix() + "/" + url
-              )
+                url.startsWith("/") ? (remoteInterfaceGroup.getDomainPrefix() + url) : (remoteInterfaceGroup.getDomainPrefix() + "/" + url)
         );
-        final HttpRequest httpRequest = new HttpRequest(urlFull);
+        final HttpRequestData httpRequestData = new HttpRequestData(interfaceRequest.getMethod(), urlFull);
 
         // 处理parameter
         interfaceRequest.getParameters().forEach(parameter -> {
             final Object value = parameter.getValue().getValue(data);
-            httpRequest.addUrlParameter(parameter.getName(), value);
+            httpRequestData.addUrlParameter(parameter.getName(), value);
         });
 
         // 处理header
         interfaceRequest.getHeaders().forEach(header -> {
             final Object value = header.getValue().getValue(data);
-            httpRequest.addHeader(header.getName(), value.toString());
+            httpRequestData.addHeader(header.getName(), value.toString());
         });
 
         //处理form和body
-        HttpRequestBody httpRequestBody = null;
+        HttpRequestDataBody httpRequestDataBody = null;
         if (interfaceRequest.hasForm()) {
             RemoteInterfaceRequestForm form = interfaceRequest.getForm();
             switch (form.getType()) {
                 case "form-data": {
-                    httpRequestBody = new FormDataHttpRequestBody("--hickey");
+                    httpRequestDataBody = new FormDataHttpRequestBody("--hickey");
                 }
                 break;
                 case "x-www-form-encoded": {
-                    httpRequestBody = new FormUrlencodedHttpRequestBody();
+                    httpRequestDataBody = new FormUrlencodedHttpRequestBody();
                 }
                 break;
                 default: {
@@ -209,20 +205,20 @@ public class HickeyTerminal {
             final String content = bodyProvider.provide(data);
             switch (body.getBodyType()) {
                 case JSON: {
-                    httpRequestBody = new JsonRawHttpRequestBody(content);
+                    httpRequestDataBody = new JsonRawHttpRequestBody(content);
                 }
                 break;
                 case XML: {
-                    httpRequestBody = new XmlRawHttpRequestBody(content);
+                    httpRequestDataBody = new XmlRawHttpRequestBody(content);
                 }
                 break;
                 case TEXT: {
-                    httpRequestBody = new TextRawHttpRequestBody(content);
+                    httpRequestDataBody = new TextRawHttpRequestBody(content);
                 }
                 break;
             }
         }
-        httpRequest.setBody(httpRequestBody);
-        return httpRequest;
+        httpRequestData.setBody(httpRequestDataBody);
+        return httpRequestData;
     }
 }

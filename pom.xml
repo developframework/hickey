@@ -16,7 +16,7 @@
 
     <name>Hickey Framework</name>
     <url>https://github.com/developframework/hickey</url>
-    <description>JSON and XML builder</description>
+    <description>基于XML配置的HTTP发送器</description>
     <inceptionYear>2018</inceptionYear>
 
     <developers>
@@ -30,7 +30,7 @@
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/developframework/kite</url>
+        <url>https://github.com/developframework/hickey</url>
     </issueManagement>
 
     <licenses>
@@ -48,10 +48,10 @@
     </scm>
 
     <properties>
-        <version.spring-boot>1.5.10.RELEASE</version.spring-boot>
-        <version.spring>4.3.14.RELEASE</version.spring>
-        <version.toolkit>0.1</version.toolkit>
-        <version.kite>0.1</version.kite>
+        <version.spring-boot>2.1.8.RELEASE</version.spring-boot>
+        <version.spring>5.1.9.RELEASE</version.spring>
+        <version.develop-toolkit>1.0.2-SNAPSHOT</version.develop-toolkit>
+        <version.kite>0.15</version.kite>
     </properties>
 
     <dependencyManagement>
@@ -73,8 +73,8 @@
             </dependency>
             <dependency>
                 <groupId>com.github.developframework</groupId>
-                <artifactId>toolkit-http</artifactId>
-                <version>${version.toolkit}</version>
+                <artifactId>develop-toolkit-http</artifactId>
+                <version>${version.develop-toolkit}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -95,11 +95,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF8</encoding>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

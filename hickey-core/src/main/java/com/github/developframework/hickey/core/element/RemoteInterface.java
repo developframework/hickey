@@ -19,6 +19,9 @@ public class RemoteInterface {
     @Setter
     private RemoteInterfaceRequest interfaceRequest;
 
+    @Setter
+    private RemoteInterfaceResponse interfaceResponse;
+
     public RemoteInterface(String groupName, String id) {
         this.groupName = groupName;
         this.id = id;

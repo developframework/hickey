@@ -13,12 +13,13 @@
                                 <xs:complexType>
                                     <xs:sequence>
                                         <xs:element name="request" type="request"/>
+                                        <xs:element name="response" type="response" minOccurs="0"/>
                                     </xs:sequence>
                                     <xs:attribute name="id" use="required"/>
                                 </xs:complexType>
                             </xs:element>
                         </xs:sequence>
-                        <xs:attribute name="group-name" type="xs:string" use="required"></xs:attribute>
+                        <xs:attribute name="group-name" type="xs:string" use="required"/>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
@@ -130,6 +131,11 @@
                     <xs:enumeration value="DELETE"/>
                 </xs:restriction>
             </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="response">
+        <xs:attribute name="processor" use="required" default="default">
         </xs:attribute>
     </xs:complexType>
 </xs:schema>

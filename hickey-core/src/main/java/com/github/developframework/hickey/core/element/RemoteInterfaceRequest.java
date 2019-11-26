@@ -1,7 +1,7 @@
 package com.github.developframework.hickey.core.element;
 
 import com.github.developframework.hickey.core.value.HickeyValue;
-import com.github.developframework.toolkit.http.HttpMethod;
+import develop.toolkit.http.request.HttpMethod;
 import lombok.Getter;
 import lombok.Setter;
 

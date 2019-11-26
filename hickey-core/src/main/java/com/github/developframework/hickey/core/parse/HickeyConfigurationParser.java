@@ -6,7 +6,7 @@ import com.github.developframework.hickey.core.bodyprovider.BodyProvider;
 import com.github.developframework.hickey.core.element.*;
 import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.hickey.core.value.HickeyValue;
-import com.github.developframework.toolkit.http.HttpMethod;
+import develop.toolkit.http.request.HttpMethod;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -68,7 +68,9 @@ public class HickeyConfigurationParser {
         final String id = remoteInterfaceElement.attributeValue("id");
         RemoteInterface remoteInterface = new RemoteInterface(group.getGroupName(), id);
         Element requestElement = remoteInterfaceElement.element("request");
+        Element responseElement = remoteInterfaceElement.element("response");
         parseRequestElement(remoteInterface, requestElement);
+        parseResponseElement(remoteInterface, responseElement);
         group.addRemoteInterface(remoteInterface);
     }
 
@@ -138,7 +140,7 @@ public class HickeyConfigurationParser {
             if (providerElement != null && providerElement.hasContent()) {
                 Element providerNameElement = (Element) providerElement.elements().get(0);
                 final String qName = providerNameElement.getQName().getName();
-                BodyProvider bodyProvider = electBodyProvider(qName);
+                BodyProvider bodyProvider = selectBodyProvider(qName);
                 bodyProvider.parseHandle(hickeyConfiguration, body, providerNameElement);
                 body.setBodyProvider(bodyProvider);
             }
@@ -147,13 +149,19 @@ public class HickeyConfigurationParser {
         remoteInterface.setInterfaceRequest(request);
     }
 
+    private void parseResponseElement(RemoteInterface remoteInterface, Element responseElement) {
+        RemoteInterfaceResponse response = new RemoteInterfaceResponse();
+        response.setProcessorName(responseElement == null ? "default" : responseElement.attributeValue("processor").trim());
+        remoteInterface.setInterfaceResponse(response);
+    }
+
     /**
      * 选举BodyProvider
      *
      * @param providerName
      * @return
      */
-    private BodyProvider electBodyProvider(String providerName) {
+    private BodyProvider selectBodyProvider(String providerName) {
         for (BodyProvider bodyProvider : hickeyConfiguration.getBodyProviders()) {
             if (bodyProvider.xmlElementQName().equals(providerName)) {
                 return bodyProvider;

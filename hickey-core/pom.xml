@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.developframework</groupId>
-            <artifactId>toolkit-http</artifactId>
+            <artifactId>develop-toolkit-http</artifactId>
         </dependency>
     </dependencies>
 
