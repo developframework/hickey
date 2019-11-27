@@ -1,22 +1,15 @@
 package com.github.developframework.hickey.core.element;
 
-import com.github.developframework.hickey.core.bodyprovider.BodyProvider;
-import lombok.Getter;
-import lombok.Setter;
+import develop.toolkit.http.request.body.HttpRequestDataBody;
+
+import java.nio.charset.Charset;
 
 /**
  * 远程接口请求Body
- * @author qiuzhenhao
  */
-@Getter
-@Setter
-public class RemoteInterfaceRequestBody {
+public interface RemoteInterfaceRequestBody {
 
-    public enum BodyType {
-        JSON, XML, TEXT
-    }
+    HttpRequestDataBody transform(Object data);
 
-    private BodyType bodyType;
-
-    private BodyProvider bodyProvider;
+    String contentType(Charset charset);
 }

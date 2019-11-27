@@ -2,7 +2,7 @@
                       xmlns="https://github.com/developframework/hickey/schema"
                       xsi:schemaLocation="https://github.com/developframework/hickey/schema hickey-configuration-0.1.xsd">
 
-    <remote-interfaces group-name="test">
+    <remote-interfaces group="test">
 
         <domain-prefix>http://localhost:8080</domain-prefix>
 
@@ -11,15 +11,12 @@
             <request method="POST">
                 <url>/students</url>
                 <parameters>
-                    <parameter name="other_param">@{otherParam}</parameter>
+                    <parameter key="other_param">@{otherParam}</parameter>
                 </parameters>
-                <headers>
-                    <header name="Content-Type">application/xml</header>
-                </headers>
-                <body type="XML">
-                    <provider>
-                        <kite-provider namespace="kite-student" template-id="student-detail"/>
-                    </provider>
+                <body>
+                    <x-www-form-urlencoded>
+                        <parameter key="">adad</parameter>
+                    </x-www-form-urlencoded>
                 </body>
             </request>
 

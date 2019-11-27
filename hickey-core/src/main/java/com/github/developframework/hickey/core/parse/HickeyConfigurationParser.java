@@ -2,11 +2,11 @@ package com.github.developframework.hickey.core.parse;
 
 import com.github.developframework.hickey.core.HickeyConfiguration;
 import com.github.developframework.hickey.core.HickeyConfigurationSource;
-import com.github.developframework.hickey.core.bodyprovider.BodyProvider;
+import com.github.developframework.hickey.core.bodyprovider.KiteRawBodyProvider;
 import com.github.developframework.hickey.core.element.*;
-import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.hickey.core.value.HickeyValue;
 import develop.toolkit.http.request.HttpMethod;
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -14,12 +14,13 @@ import org.dom4j.io.SAXReader;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * hickey配置文件解析器
  * dom4j方式
  *
- * @author qiuzhenhao
  */
 public class HickeyConfigurationParser {
 
@@ -30,8 +31,7 @@ public class HickeyConfigurationParser {
     }
 
     public void parse(HickeyConfigurationSource hickeyConfigurationSource) throws IOException, DocumentException {
-        SAXReader reader = new SAXReader();
-        Document document = reader.read(hickeyConfigurationSource.getInputStream());
+        Document document = new SAXReader().read(hickeyConfigurationSource.getInputStream());
         Element hickeyConfigurationElement = document.getRootElement();
         parseRemoteInterfaceCollectionElement(hickeyConfigurationElement);
 
@@ -46,7 +46,7 @@ public class HickeyConfigurationParser {
     private void parseRemoteInterfaceCollectionElement(Element hickeyConfigurationElement) {
         for(Iterator<Element> iterator = hickeyConfigurationElement.elementIterator("remote-interfaces"); iterator.hasNext();) {
             Element remoteInterfacesElement = iterator.next();
-            final String groupName = remoteInterfacesElement.attributeValue("group-name");
+            final String groupName = remoteInterfacesElement.attributeValue("group");
             final RemoteInterfaceGroup group = hickeyConfiguration.addRemoteInterfaceGroup(groupName);
             Element domainPrefixElement = remoteInterfacesElement.element("domain-prefix");
             if (domainPrefixElement != null) {
@@ -98,8 +98,8 @@ public class HickeyConfigurationParser {
             for (Iterator<Element> headerIterator = headersElement.elementIterator("header"); headerIterator.hasNext(); ) {
                 Element headerElement = headerIterator.next();
                 final String name = headerElement.attributeValue("name");
-                HickeyValue value = new HickeyValue(headerElement.getTextTrim());
-                request.addHeader(new RemoteInterfaceRequestHeader(name, value));
+                HickeyValue value = HickeyValue.of(headerElement.getTextTrim());
+                request.addHeader(name, value);
             }
         }
 
@@ -108,41 +108,62 @@ public class HickeyConfigurationParser {
         if (parametersElement != null) {
             for (Iterator<Element> parameterIterator = parametersElement.elementIterator("parameter"); parameterIterator.hasNext(); ) {
                 Element parameterElement = parameterIterator.next();
-                final String name = parameterElement.attributeValue("name");
-                HickeyValue value = new HickeyValue(parameterElement.getTextTrim());
-                request.addParameter(new RemoteInterfaceRequestParameter(name, value));
+                final String key = parameterElement.attributeValue("key");
+                String text = parameterElement.getTextTrim();
+                HickeyValue value = StringUtils.isEmpty(text) ? HickeyValue.ofValue(key) : HickeyValue.of(text);
+                request.addParameter(key, value);
             }
-        }
-
-        // 解析 form
-        Element formElement = requestElement.element("form");
-        if (formElement != null) {
-            final String formType = formElement.attributeValue("type");
-            RemoteInterfaceRequestForm form = new RemoteInterfaceRequestForm(formType);
-            for (Iterator<Element> propertyIterator = parametersElement.elementIterator("property"); propertyIterator.hasNext(); ) {
-                Element propertyElement = propertyIterator.next();
-                final String name = propertyElement.attributeValue("name");
-                HickeyValue value = new HickeyValue(propertyElement.getTextTrim());
-                form.addFormParameter(new RemoteInterfaceRequestFormProperty(name, value));
-            }
-            request.setForm(form);
         }
 
         // 解析 body
         Element bodyElement = requestElement.element("body");
         if (bodyElement != null) {
-            String bodyTypeValue = bodyElement.attributeValue("type");
-            RemoteInterfaceRequestBody body = new RemoteInterfaceRequestBody();
-            body.setBodyType(RemoteInterfaceRequestBody.BodyType.valueOf(bodyTypeValue));
+            RemoteInterfaceRequestBody body = null;
+            Element rawElement = bodyElement.element("raw");
+            Element formEncodedElement = bodyElement.element("x-www-form-urlencoded");
+            Element formDataElement = bodyElement.element("form-data");
+            if (rawElement != null) {
+                RemoteInterfaceRawRequestBody rawBody = new RemoteInterfaceRawRequestBody();
+                rawBody.setType(RawType.valueOf(rawElement.attributeValue("type")));
+                Element contentElement = rawElement.element("content");
+                Element kiteProviderElement = rawElement.element("kite-provider");
+                if (contentElement != null) {
+                    rawBody.setContent(HickeyValue.of(contentElement.getTextTrim()));
+                } else if (kiteProviderElement != null) {
+                    String namespace = kiteProviderElement.attributeValue("namespace");
+                    String templateId = kiteProviderElement.attributeValue("template-id");
+                    String root = kiteProviderElement.attributeValue("root");
+                    rawBody.setRawBodyProvider(new KiteRawBodyProvider(hickeyConfiguration.getKiteFactory(), rawBody.getType(), namespace, templateId, root == null ? "body" : root));
+                }
+                body = rawBody;
+            }
 
-            // 解析provider
-            Element providerElement = bodyElement.element("provider");
-            if (providerElement != null && providerElement.hasContent()) {
-                Element providerNameElement = (Element) providerElement.elements().get(0);
-                final String qName = providerNameElement.getQName().getName();
-                BodyProvider bodyProvider = selectBodyProvider(qName);
-                bodyProvider.parseHandle(hickeyConfiguration, body, providerNameElement);
-                body.setBodyProvider(bodyProvider);
+            if (formEncodedElement != null) {
+                RemoteInterfaceFormUrlEncodedRequestBody formUrlEncodeBody = new RemoteInterfaceFormUrlEncodedRequestBody();
+                Map<String, HickeyValue> parameters = new LinkedHashMap<>();
+                for (Iterator<Element> iterator = formEncodedElement.elementIterator("parameter"); iterator.hasNext(); ) {
+                    Element parameterElement = iterator.next();
+                    String key = parameterElement.attributeValue("key");
+                    String value = parameterElement.attributeValue("value");
+                    HickeyValue hickeyValue = value == null ? HickeyValue.ofValue(key) : HickeyValue.of(value);
+                    parameters.put(key, hickeyValue);
+                }
+                formUrlEncodeBody.setParameters(parameters);
+                body = formUrlEncodeBody;
+            }
+
+            if (formDataElement != null) {
+                RemoteInterfaceFormDataRequestBody formDataBody = new RemoteInterfaceFormDataRequestBody();
+                Map<String, HickeyValue> parameters = new LinkedHashMap<>();
+                for (Iterator<Element> iterator = formDataElement.elementIterator("parameter"); iterator.hasNext(); ) {
+                    Element parameterElement = iterator.next();
+                    String key = parameterElement.attributeValue("key");
+                    String text = parameterElement.getTextTrim();
+                    HickeyValue value = StringUtils.isEmpty(text) ? HickeyValue.ofValue(key) : HickeyValue.of(text);
+                    parameters.put(key, value);
+                }
+                formDataBody.setParameters(parameters);
+                body = formDataBody;
             }
             request.setBody(body);
         }
@@ -153,20 +174,5 @@ public class HickeyConfigurationParser {
         RemoteInterfaceResponse response = new RemoteInterfaceResponse();
         response.setProcessorName(responseElement == null ? "default" : responseElement.attributeValue("processor").trim());
         remoteInterface.setInterfaceResponse(response);
-    }
-
-    /**
-     * 选举BodyProvider
-     *
-     * @param providerName
-     * @return
-     */
-    private BodyProvider selectBodyProvider(String providerName) {
-        for (BodyProvider bodyProvider : hickeyConfiguration.getBodyProviders()) {
-            if (bodyProvider.xmlElementQName().equals(providerName)) {
-                return bodyProvider;
-            }
-        }
-        throw new HickeyException("Body provider \"%s\" is not exist.", providerName);
     }
 }

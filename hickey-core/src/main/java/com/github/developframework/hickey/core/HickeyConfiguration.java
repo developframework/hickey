@@ -1,16 +1,11 @@
 package com.github.developframework.hickey.core;
 
-import com.github.developframework.hickey.core.bodyprovider.BodyProvider;
-import com.github.developframework.hickey.core.bodyprovider.DefaultBodyProvider;
-import com.github.developframework.hickey.core.bodyprovider.KiteBodyProvider;
 import com.github.developframework.hickey.core.element.RemoteInterfaceGroup;
 import com.github.developframework.hickey.core.exception.GroupUndefinedException;
 import com.github.developframework.kite.core.KiteFactory;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,47 +18,8 @@ public class HickeyConfiguration {
     private Map<String, RemoteInterfaceGroup> remoteInterfaceGroupMap = new ConcurrentHashMap<>();
 
     @Getter
-    private List<BodyProvider> bodyProviders = new LinkedList<>();
-
-    @Getter
+    @Setter
     private KiteFactory kiteFactory;
-
-    public HickeyConfiguration() {
-        registerDefaultBodyProvider();
-    }
-
-    /**
-     * 注册系统内置BodyProvider
-     */
-    private void registerDefaultBodyProvider() {
-        bodyProviders.add(new DefaultBodyProvider());
-    }
-
-    /**
-     * 添加BodyProvider
-     * @param bodyProvider
-     */
-    public void addBodyProvider(BodyProvider bodyProvider) {
-        bodyProviders.add(bodyProvider);
-    }
-
-    /**
-     * 初始化Kite
-     * @param kiteConfigs 配置文件路径
-     */
-    public void initializeKite(String... kiteConfigs) {
-        kiteFactory = new KiteFactory(kiteConfigs);
-        bodyProviders.add(new KiteBodyProvider());
-    }
-
-    /**
-     * 设置存在的KiteFactory
-     * @param kiteFactory
-     */
-    public void setKiteFactory(KiteFactory kiteFactory) {
-        this.kiteFactory = kiteFactory;
-        bodyProviders.add(new KiteBodyProvider());
-    }
 
     /**
      * 添加接口组

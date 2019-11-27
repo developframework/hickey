@@ -5,12 +5,11 @@ import develop.toolkit.http.request.HttpMethod;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 远程接口请求体
- * @author qiuzhenhao
  */
 @Getter
 public class RemoteInterfaceRequest {
@@ -26,21 +25,17 @@ public class RemoteInterfaceRequest {
     private String description;
 
     /* 接口请求头信息列表 */
-    private List<RemoteInterfaceRequestHeader> headers = new LinkedList<>();
+    private Map<String, HickeyValue> headers = new LinkedHashMap<>();
 
     /* 接口url参数列表 */
-    private List<RemoteInterfaceRequestParameter> parameters = new LinkedList<>();
-
-    /* 接口请求表单 */
-    @Setter
-    private RemoteInterfaceRequestForm form;
+    private Map<String, HickeyValue> parameters = new LinkedHashMap<>();
 
     /* 接口请求Body */
     @Setter
     private RemoteInterfaceRequestBody body;
 
     public RemoteInterfaceRequest(String url, HttpMethod method) {
-        this.url = new HickeyValue(url);
+        this.url = HickeyValue.of(url);
         this.method = method;
     }
 
@@ -48,31 +43,15 @@ public class RemoteInterfaceRequest {
      * 添加header信息
      * @param header header信息
      */
-    public void addHeader(RemoteInterfaceRequestHeader header) {
-        headers.add(header);
+    public void addHeader(String header, HickeyValue hickeyValue) {
+        headers.put(header, hickeyValue);
     }
 
     /**
      * 添加参数
-     * @param parameter 参数
+     * @param key 参数
      */
-    public void addParameter(RemoteInterfaceRequestParameter parameter) {
-        parameters.add(parameter);
-    }
-
-    /**
-     * 判断是否有表单
-     * @return
-     */
-    public boolean hasForm() {
-        return form != null;
-    }
-
-    /**
-     * 判断是否有Body
-     * @return
-     */
-    public boolean hasBody() {
-        return body != null;
+    public void addParameter(String key, HickeyValue hickeyValue) {
+        parameters.put(key, hickeyValue);
     }
 }

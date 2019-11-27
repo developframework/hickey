@@ -13,7 +13,7 @@ public class HickeyValue {
 
     private String targetValue;
 
-    public HickeyValue(String targetValue) {
+    private HickeyValue(String targetValue) {
         this.targetValue = targetValue;
     }
 
@@ -38,5 +38,13 @@ public class HickeyValue {
 
     private String getExpressionString(String targetValue) {
         return targetValue.substring(2, targetValue.length() - 1);
+    }
+
+    public static HickeyValue of(String expression) {
+        return new HickeyValue(expression);
+    }
+
+    public static HickeyValue ofValue(String value) {
+        return new HickeyValue(String.format("@{%s}", value));
     }
 }

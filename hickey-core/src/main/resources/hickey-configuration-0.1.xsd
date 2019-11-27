@@ -19,7 +19,7 @@
                                 </xs:complexType>
                             </xs:element>
                         </xs:sequence>
-                        <xs:attribute name="group-name" type="xs:string" use="required"/>
+                        <xs:attribute name="group" type="xs:string" use="required"/>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
@@ -28,6 +28,7 @@
 
     <xs:complexType name="request">
         <xs:sequence>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
             <xs:element name="url" type="xs:string"/>
             <xs:element name="parameters" minOccurs="0">
                 <xs:complexType>
@@ -36,7 +37,7 @@
                             <xs:complexType>
                                 <xs:simpleContent>
                                     <xs:extension base="xs:string">
-                                        <xs:attribute name="name" type="xs:string" use="required"/>
+                                        <xs:attribute name="key" type="xs:string" use="required"/>
                                     </xs:extension>
                                 </xs:simpleContent>
                             </xs:complexType>
@@ -44,7 +45,6 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="description" type="xs:string" minOccurs="0"/>
             <xs:element name="headers" minOccurs="0">
                 <xs:complexType>
                     <xs:sequence>
@@ -61,63 +61,43 @@
                 </xs:complexType>
             </xs:element>
             <xs:choice>
-                <xs:element name="form" minOccurs="0">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element name="property" maxOccurs="unbounded">
-                                <xs:complexType>
-                                    <xs:simpleContent>
-                                        <xs:extension base="xs:string">
-                                            <xs:attribute name="name" type="xs:string" use="required"/>
-                                            <xs:attribute name="value" type="xs:string"/>
-                                        </xs:extension>
-                                    </xs:simpleContent>
-                                </xs:complexType>
-                            </xs:element>
-                        </xs:sequence>
-                        <xs:attribute name="type" use="required">
-                            <xs:simpleType>
-                                <xs:restriction base="xs:string">
-                                    <xs:enumeration value="x-www-form-urlencoded"/>
-                                    <xs:enumeration value="form-data"/>
-                                </xs:restriction>
-                            </xs:simpleType>
-                        </xs:attribute>
-                    </xs:complexType>
-                </xs:element>
                 <xs:element name="body" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="provider">
-                                <xs:complexType>
-                                    <xs:choice>
-                                        <xs:element name="default-provider">
-                                        </xs:element>
-                                        <xs:element name="file-provider">
-                                            <xs:complexType>
-                                                <xs:attribute name="file" use="required"/>
-                                            </xs:complexType>
-                                        </xs:element>
-                                        <xs:element name="kite-provider">
-                                            <xs:complexType>
-                                                <xs:attribute name="namespace" use="required"/>
-                                                <xs:attribute name="template-id" use="required"/>
-                                            </xs:complexType>
-                                        </xs:element>
-                                        <xs:any />
-                                    </xs:choice>
-                                </xs:complexType>
-                            </xs:element>
+                            <xs:choice>
+                                <xs:element name="raw" minOccurs="0">
+                                    <xs:complexType>
+                                        <xs:choice>
+                                            <xs:element name="kite-provider">
+                                                <xs:complexType>
+                                                    <xs:attribute name="namespace" use="required"/>
+                                                    <xs:attribute name="template-id" use="required"/>
+                                                    <xs:attribute name="root" default="body"/>
+                                                </xs:complexType>
+                                            </xs:element>
+                                            <xs:element name="content">
+                                                <xs:complexType>
+                                                    <xs:simpleContent>
+                                                        <xs:extension base="xs:string"/>
+                                                    </xs:simpleContent>
+                                                </xs:complexType>
+                                            </xs:element>
+                                        </xs:choice>
+                                        <xs:attribute name="type" use="required">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:enumeration value="JSON"/>
+                                                    <xs:enumeration value="XML"/>
+                                                    <xs:enumeration value="PLAIN"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:attribute>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:element name="x-www-form-urlencoded" type="form" minOccurs="0"/>
+                                <xs:element name="form-data" type="form" minOccurs="0"/>
+                            </xs:choice>
                         </xs:sequence>
-                        <xs:attribute name="type" use="required">
-                            <xs:simpleType>
-                                <xs:restriction base="xs:string">
-                                    <xs:enumeration value="JSON"/>
-                                    <xs:enumeration value="XML"/>
-                                    <xs:enumeration value="TEXT"/>
-                                </xs:restriction>
-                            </xs:simpleType>
-                        </xs:attribute>
                     </xs:complexType>
                 </xs:element>
             </xs:choice>
@@ -137,5 +117,19 @@
     <xs:complexType name="response">
         <xs:attribute name="processor" use="required" default="default">
         </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="form">
+        <xs:sequence>
+            <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="key" type="xs:string" use="required"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
     </xs:complexType>
 </xs:schema>
