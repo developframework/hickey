@@ -7,17 +7,16 @@ import com.github.developframework.hickey.core.element.RemoteInterfaceRequestBod
 import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.hickey.core.exception.HickeyRequestFailException;
 import com.github.developframework.hickey.core.parse.HickeyConfigurationParser;
+import com.github.developframework.hickey.core.processor.ResponseBodyProcessor;
+import com.github.developframework.hickey.core.processor.StringResponseBodyProcessor;
 import com.github.developframework.kite.core.KiteFactory;
 import com.github.developframework.kite.core.exception.KiteParseXmlException;
-import develop.toolkit.base.components.StopWatch;
+import develop.toolkit.base.utils.DateTimeAdvice;
 import develop.toolkit.http.HttpFailedException;
 import develop.toolkit.http.JDKToolkitHttpClient;
 import develop.toolkit.http.ToolkitHttpClient;
 import develop.toolkit.http.request.HttpRequestData;
-import develop.toolkit.http.response.ByteHttpResponseBodyProcessor;
-import develop.toolkit.http.response.DefaultHttpResponseBodyProcessor;
 import develop.toolkit.http.response.HttpResponseData;
-import develop.toolkit.http.response.HttpResponseDataBodyProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +38,7 @@ public final class HickeyTerminal {
 
     private boolean isStart;
 
-    private final Map<String, HttpResponseDataBodyProcessor> processors = new HashMap<>();
+    private final Map<String, ResponseBodyProcessor> processors = new HashMap<>();
 
     public HickeyTerminal(String... configs) {
         Objects.requireNonNull(configs);
@@ -56,7 +55,7 @@ public final class HickeyTerminal {
         registerDefaultProcessors();
     }
 
-    public void addProcessor(String name, HttpResponseDataBodyProcessor processor) {
+    public void addProcessor(String name, ResponseBodyProcessor processor) {
         processors.put(name, processor);
     }
 
@@ -64,8 +63,7 @@ public final class HickeyTerminal {
      * 注册默认处理器
      */
     private void registerDefaultProcessors() {
-        addProcessor("default", new DefaultHttpResponseBodyProcessor());
-        addProcessor("byte", new ByteHttpResponseBodyProcessor());
+        addProcessor("string", new StringResponseBodyProcessor());
     }
 
     /**
@@ -108,8 +106,7 @@ public final class HickeyTerminal {
      * @param data        数据包
      * @return 响应体
      */
-    @SuppressWarnings("unchecked")
-    public <T, Y> HttpResponseData<T, Y> touch(String groupName, String interfaceId, Object data) {
+    public HttpResponseData touch(String groupName, String interfaceId, Object data) {
         if (!isStart) {
             throw new HickeyException("Hickey is not running, please invoke start() first");
         }
@@ -118,9 +115,9 @@ public final class HickeyTerminal {
         RemoteInterfaceRequest interfaceRequest = remoteInterface.getInterfaceRequest();
         HttpRequestData httpRequestData = initializeHttpRequest(remoteInterfaceGroup, interfaceRequest, data);
         try {
-            StopWatch stopWatch = StopWatch.start();
-            HttpResponseData<T, Y> httpResponseData = client.request(httpRequestData, processors.get(remoteInterface.getInterfaceResponse().getProcessorName()));
-            debugInfo(interfaceRequest, httpRequestData, httpResponseData, stopWatch.formatEnd());
+            HttpResponseData httpResponseData = client.request(httpRequestData);
+            debugInfo(interfaceRequest, httpRequestData, httpResponseData);
+            final Object result = getProcessor(remoteInterface.getInterfaceResponse().getProcessorName()).process(httpResponseData.getData());
             return httpResponseData;
         } catch (HttpFailedException e) {
             throw new HickeyRequestFailException(e.getMessage());
@@ -134,7 +131,7 @@ public final class HickeyTerminal {
      * @param httpResponseData
      */
     @SuppressWarnings("unchecked")
-    private void debugInfo(RemoteInterfaceRequest interfaceRequest, HttpRequestData httpRequestData, HttpResponseData httpResponseData, String costTime) {
+    private void debugInfo(RemoteInterfaceRequest interfaceRequest, HttpRequestData httpRequestData, HttpResponseData httpResponseData) {
         if (log.isDebugEnabled()) {
             StringBuffer sb = new StringBuffer();
             sb
@@ -168,13 +165,8 @@ public final class HickeyTerminal {
             for (Map.Entry<String, List<String>> entry : set) {
                 sb.append("    ").append(entry.getKey()).append(": ").append(StringUtils.join(entry.getValue(), "  |  ")).append('\n');
             }
-            sb.append("  body: \n    ");
-            if (httpResponseData.isSuccess()) {
-                sb.append(httpResponseData.getSuccessBody() != null ? httpResponseData.getSuccessBody() : "(empty)");
-            } else {
-                sb.append(httpResponseData.getErrorBody() != null ? httpResponseData.getErrorBody() : "(empty)");
-            }
-            sb.append("\n\n===========================================================【cost time: ").append(costTime).append("】===========================================================\n\n");
+            sb.append("  body: \n    ").append(httpResponseData.getStringBody());
+            sb.append("\n\n===========================================================【cost time: ").append(DateTimeAdvice.millisecondPretty(httpResponseData.getCostTime())).append("】===========================================================\n\n");
             log.debug(sb.toString());
         }
     }
@@ -200,5 +192,13 @@ public final class HickeyTerminal {
         RemoteInterfaceRequestBody body = interfaceRequest.getBody();
         httpRequestData.setBody(body != null ? body.transform(data) : null);
         return httpRequestData;
+    }
+
+    private <T> ResponseBodyProcessor<T> getProcessor(String name) {
+        ResponseBodyProcessor responseBodyProcessor = processors.get(name);
+        if (responseBodyProcessor == null) {
+            throw new HickeyException("no \"%s\" processor", name);
+        }
+        return responseBodyProcessor;
     }
 }

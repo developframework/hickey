@@ -115,7 +115,7 @@
     </xs:complexType>
 
     <xs:complexType name="response">
-        <xs:attribute name="processor" use="required" default="default">
+        <xs:attribute name="processor" use="required" default="string">
         </xs:attribute>
     </xs:complexType>
 
