@@ -7,8 +7,6 @@ import com.github.developframework.hickey.core.element.RemoteInterfaceRequestBod
 import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.hickey.core.exception.HickeyRequestFailException;
 import com.github.developframework.hickey.core.parse.HickeyConfigurationParser;
-import com.github.developframework.hickey.core.processor.ResponseBodyProcessor;
-import com.github.developframework.hickey.core.processor.StringResponseBodyProcessor;
 import com.github.developframework.kite.core.KiteFactory;
 import com.github.developframework.kite.core.exception.KiteParseXmlException;
 import develop.toolkit.base.utils.DateTimeAdvice;
@@ -38,32 +36,17 @@ public final class HickeyTerminal {
 
     private boolean isStart;
 
-    private final Map<String, ResponseBodyProcessor> processors = new HashMap<>();
-
     public HickeyTerminal(String... configs) {
         Objects.requireNonNull(configs);
         this.sources = new HashSet<>();
         for (String config : configs) {
             sources.add(new FileHickeyConfigurationSource(config));
         }
-        registerDefaultProcessors();
     }
 
     public HickeyTerminal(Set<HickeyConfigurationSource> sources) {
         Objects.requireNonNull(sources);
         this.sources = sources;
-        registerDefaultProcessors();
-    }
-
-    public void addProcessor(String name, ResponseBodyProcessor processor) {
-        processors.put(name, processor);
-    }
-
-    /**
-     * 注册默认处理器
-     */
-    private void registerDefaultProcessors() {
-        addProcessor("string", new StringResponseBodyProcessor());
     }
 
     /**
@@ -117,7 +100,6 @@ public final class HickeyTerminal {
         try {
             HttpResponseData httpResponseData = client.request(httpRequestData);
             debugInfo(interfaceRequest, httpRequestData, httpResponseData);
-            final Object result = getProcessor(remoteInterface.getInterfaceResponse().getProcessorName()).process(httpResponseData.getData());
             return httpResponseData;
         } catch (HttpFailedException e) {
             throw new HickeyRequestFailException(e.getMessage());
@@ -192,13 +174,5 @@ public final class HickeyTerminal {
         RemoteInterfaceRequestBody body = interfaceRequest.getBody();
         httpRequestData.setBody(body != null ? body.transform(data) : null);
         return httpRequestData;
-    }
-
-    private <T> ResponseBodyProcessor<T> getProcessor(String name) {
-        ResponseBodyProcessor responseBodyProcessor = processors.get(name);
-        if (responseBodyProcessor == null) {
-            throw new HickeyException("no \"%s\" processor", name);
-        }
-        return responseBodyProcessor;
     }
 }
