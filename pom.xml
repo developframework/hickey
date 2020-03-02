@@ -51,7 +51,7 @@
         <version.spring-boot>2.1.8.RELEASE</version.spring-boot>
         <version.spring>5.1.9.RELEASE</version.spring>
         <version.develop-toolkit>1.0.2-SNAPSHOT</version.develop-toolkit>
-        <version.kite>0.15</version.kite>
+        <version.kite>0.16</version.kite>
     </properties>
 
     <dependencyManagement>
@@ -104,14 +104,15 @@
         </plugins>
     </build>
 
+    <!-- 配置私库地址 -->
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>hclc nexus</id>
+            <url>http://nexus.hclc-tech.com:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>hclc nexus</id>
+            <url>http://nexus.hclc-tech.com:8081/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 
@@ -165,6 +166,16 @@
                     </plugin>
                 </plugins>
             </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
         </profile>
     </profiles>
 </project>
