@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 /**
  * 远程接口请求Body
  */
-public interface RemoteInterfaceRequestBody {
+public interface RequestBodyElement {
 
     HttpRequestDataBody transform(Object data);
 

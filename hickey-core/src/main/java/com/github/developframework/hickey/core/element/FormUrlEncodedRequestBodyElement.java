@@ -9,7 +9,7 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 @Setter
-public class RemoteInterfaceFormDataRequestBody implements RemoteInterfaceRequestBody {
+public class FormUrlEncodedRequestBodyElement implements RequestBodyElement {
 
     private Map<String, HickeyValue> parameters;
 
@@ -22,6 +22,6 @@ public class RemoteInterfaceFormDataRequestBody implements RemoteInterfaceReques
 
     @Override
     public String contentType(Charset charset) {
-        return "application/form-data;charset=" + charset.displayName();
+        return "application/x-www-form-urlencoded;charset=" + charset.displayName();
     }
 }

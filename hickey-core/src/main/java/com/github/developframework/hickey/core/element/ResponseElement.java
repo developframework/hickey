@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RemoteInterfaceResponse {
+public class ResponseElement {
 
     private String processorName;
 }

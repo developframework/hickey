@@ -7,20 +7,21 @@ import java.util.List;
 
 /**
  * 远程接口请求表单
+ *
  * @author qiuzhenhao
  */
 @Getter
-public class RemoteInterfaceRequestForm {
+public class RequestFormElement {
 
     private String type;
 
-    private List<RemoteInterfaceRequestFormProperty> properties = new LinkedList<>();
+    private List<RequestFormPropertyElement> properties = new LinkedList<>();
 
-    public RemoteInterfaceRequestForm(String type) {
+    public RequestFormElement(String type) {
         this.type = type;
     }
 
-    public void addFormParameter(RemoteInterfaceRequestFormProperty property) {
+    public void addFormParameter(RequestFormPropertyElement property) {
         properties.add(property);
     }
 }

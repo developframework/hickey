@@ -12,12 +12,12 @@ import java.util.Map;
  * 远程接口请求体
  */
 @Getter
-public class RemoteInterfaceRequest {
+public class RequestElement {
 
-     /* 接口Url */
+    /* 接口Url */
     private HickeyValue url;
 
-     /* 接口请求方式 */
+    /* 接口请求方式 */
     private HttpMethod method;
 
     /* 接口描述 */
@@ -32,9 +32,9 @@ public class RemoteInterfaceRequest {
 
     /* 接口请求Body */
     @Setter
-    private RemoteInterfaceRequestBody body;
+    private RequestBodyElement body;
 
-    public RemoteInterfaceRequest(String url, HttpMethod method) {
+    public RequestElement(String url, HttpMethod method) {
         this.url = HickeyValue.of(url);
         this.method = method;
     }

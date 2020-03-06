@@ -13,7 +13,7 @@ import java.nio.charset.Charset;
 
 @Setter
 @Getter
-public class RemoteInterfaceRawRequestBody implements RemoteInterfaceRequestBody {
+public class RawRequestBodyElement implements RequestBodyElement {
 
     private RawType type;
 

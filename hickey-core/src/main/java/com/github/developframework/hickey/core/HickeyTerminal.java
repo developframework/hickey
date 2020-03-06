@@ -1,15 +1,15 @@
 package com.github.developframework.hickey.core;
 
-import com.github.developframework.hickey.core.element.RemoteInterface;
-import com.github.developframework.hickey.core.element.RemoteInterfaceGroup;
-import com.github.developframework.hickey.core.element.RemoteInterfaceRequest;
-import com.github.developframework.hickey.core.element.RemoteInterfaceRequestBody;
+import com.github.developframework.hickey.core.element.RemoteInterfaceElement;
+import com.github.developframework.hickey.core.element.RemoteInterfaceGroupElement;
+import com.github.developframework.hickey.core.element.RequestElement;
 import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.hickey.core.exception.HickeyRequestFailException;
 import com.github.developframework.hickey.core.parse.HickeyConfigurationParser;
 import com.github.developframework.kite.core.KiteFactory;
 import com.github.developframework.kite.core.exception.KiteParseXmlException;
 import develop.toolkit.base.utils.DateTimeAdvice;
+import develop.toolkit.base.utils.K;
 import develop.toolkit.http.HttpFailedException;
 import develop.toolkit.http.JDKToolkitHttpClient;
 import develop.toolkit.http.ToolkitHttpClient;
@@ -56,7 +56,7 @@ public final class HickeyTerminal {
      */
     public void useKite(KiteFactory kiteFactory) {
         if (isStart) {
-            log.warn("Hickey is running.");
+            log.warn("HickeyTerminal is running.");
             return;
         }
         hickeyConfiguration.setKiteFactory(kiteFactory);
@@ -65,7 +65,7 @@ public final class HickeyTerminal {
 
     public synchronized void start() {
         if (isStart) {
-            log.warn("Hickey is running.");
+            log.warn("HickeyTerminal is running.");
             return;
         }
         HickeyConfigurationParser hickeyConfigurationParser = new HickeyConfigurationParser(hickeyConfiguration);
@@ -89,18 +89,18 @@ public final class HickeyTerminal {
      * @param data        数据包
      * @return 响应体
      */
-    public HttpResponseData touch(String groupName, String interfaceId, Object data) {
+    public HttpResponseData touch(String groupName, String interfaceId, Object data) throws HickeyRequestFailException {
         if (!isStart) {
-            throw new HickeyException("Hickey is not running, please invoke start() first");
+            throw new HickeyException("HickeyTerminal is not running, please invoke start() first");
         }
-        final RemoteInterfaceGroup remoteInterfaceGroup = hickeyConfiguration.getRemoteInterfaceGroup(groupName);
-        final RemoteInterface remoteInterface = remoteInterfaceGroup.extractRemoteInterface(interfaceId);
-        RemoteInterfaceRequest interfaceRequest = remoteInterface.getInterfaceRequest();
-        HttpRequestData httpRequestData = initializeHttpRequest(remoteInterfaceGroup, interfaceRequest, data);
+        final RemoteInterfaceGroupElement groupElement = hickeyConfiguration.getRemoteInterfaceGroup(groupName);
+        final RemoteInterfaceElement interfaceElement = groupElement.extractRemoteInterface(interfaceId);
+        final RequestElement requestElement = interfaceElement.getInterfaceRequest();
+        final HttpRequestData requestData = initializeHttpRequestData(groupElement.getDomainPrefix(), requestElement, data);
         try {
-            HttpResponseData httpResponseData = client.request(httpRequestData);
-            debugInfo(interfaceRequest, httpRequestData, httpResponseData);
-            return httpResponseData;
+            final HttpResponseData responseData = client.request(requestData);
+            debugInfo(requestElement, requestData, responseData);
+            return responseData;
         } catch (HttpFailedException e) {
             throw new HickeyRequestFailException(e.getMessage());
         }
@@ -112,8 +112,7 @@ public final class HickeyTerminal {
      * @param httpRequestData
      * @param httpResponseData
      */
-    @SuppressWarnings("unchecked")
-    private void debugInfo(RemoteInterfaceRequest interfaceRequest, HttpRequestData httpRequestData, HttpResponseData httpResponseData) {
+    private void debugInfo(RequestElement interfaceRequest, HttpRequestData httpRequestData, HttpResponseData httpResponseData) {
         if (log.isDebugEnabled()) {
             StringBuffer sb = new StringBuffer();
             sb
@@ -136,18 +135,16 @@ public final class HickeyTerminal {
             }
             if (httpRequestData.getBody() != null) {
                 sb.append("  body: \n");
-                String body = new String(httpRequestData.getBody().serializeBody(httpRequestData.getCharset()), httpRequestData.getCharset());
-                sb.append("    ").append(body).append('\n');
+                sb.append("    ").append(httpRequestData.stringBody()).append('\n');
             }
             sb
                     .append("\n【RESPONSE】\n")
                     .append("  status: ").append(httpResponseData.getHttpStatus()).append('\n')
                     .append("  headers:\n");
-            Set<Map.Entry<String, List<String>>> set = httpResponseData.getHeaders().entrySet();
-            for (Map.Entry<String, List<String>> entry : set) {
+            for (Map.Entry<String, List<String>> entry : httpResponseData.getHeaders().entrySet()) {
                 sb.append("    ").append(entry.getKey()).append(": ").append(StringUtils.join(entry.getValue(), "  |  ")).append('\n');
             }
-            sb.append("  body: \n    ").append(httpResponseData.getStringBody());
+            sb.append("  body: \n    ").append(httpResponseData.stringBody());
             sb.append("\n\n===========================================================【cost time: ").append(DateTimeAdvice.millisecondPretty(httpResponseData.getCostTime())).append("】===========================================================\n\n");
             log.debug(sb.toString());
         }
@@ -156,23 +153,23 @@ public final class HickeyTerminal {
     /**
      * 初始化请求体
      *
-     * @param remoteInterfaceGroup
-     * @param interfaceRequest
+     * @param domainPrefix
+     * @param requestElement
      * @return
      */
-    private HttpRequestData initializeHttpRequest(RemoteInterfaceGroup remoteInterfaceGroup, RemoteInterfaceRequest interfaceRequest, final Object data) {
-        final String url = interfaceRequest.getUrl().getValue(data);
-        final String urlFull = remoteInterfaceGroup.getDomainPrefix() == null ? url : (
-                url.startsWith("/") ? (remoteInterfaceGroup.getDomainPrefix() + url) : (remoteInterfaceGroup.getDomainPrefix() + "/" + url)
+    private HttpRequestData initializeHttpRequestData(String domainPrefix, RequestElement requestElement, final Object data) {
+        final String url = requestElement.getUrl().getValue(data);
+        final String urlFull = domainPrefix == null ? url : (
+                url.startsWith("/") ? (domainPrefix + url) : (domainPrefix + "/" + url)
         );
-        final HttpRequestData httpRequestData = new HttpRequestData(interfaceRequest.getMethod(), urlFull);
+        final HttpRequestData httpRequestData = new HttpRequestData(requestElement.getMethod(), urlFull)
+                .addBody(
+                        K.map(requestElement.getBody(), body -> body.transform(data))
+                );
         // 处理parameter
-        interfaceRequest.getParameters().forEach((k, v) -> httpRequestData.addUrlParameter(k, v.getValue(data)));
+        requestElement.getParameters().forEach((k, v) -> httpRequestData.addUrlParameter(k, v.getValue(data)));
         // 处理header
-        interfaceRequest.getHeaders().forEach((h, v) -> httpRequestData.addHeader(h, v.getValue(data)));
-        //处理body
-        RemoteInterfaceRequestBody body = interfaceRequest.getBody();
-        httpRequestData.setBody(body != null ? body.transform(data) : null);
+        requestElement.getHeaders().forEach((h, v) -> httpRequestData.addHeader(h, v.getValue(data)));
         return httpRequestData;
     }
 }

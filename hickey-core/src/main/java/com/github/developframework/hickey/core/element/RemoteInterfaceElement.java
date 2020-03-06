@@ -5,10 +5,11 @@ import lombok.Setter;
 
 /**
  * 远程接口节点
+ *
  * @author qiuzhenhao
  */
 @Getter
-public class RemoteInterface {
+public class RemoteInterfaceElement {
 
     /* 分组名称 */
     private String groupName;
@@ -17,12 +18,12 @@ public class RemoteInterface {
     private String id;
 
     @Setter
-    private RemoteInterfaceRequest interfaceRequest;
+    private RequestElement interfaceRequest;
 
     @Setter
-    private RemoteInterfaceResponse interfaceResponse;
+    private ResponseElement interfaceResponse;
 
-    public RemoteInterface(String groupName, String id) {
+    public RemoteInterfaceElement(String groupName, String id) {
         this.groupName = groupName;
         this.id = id;
     }

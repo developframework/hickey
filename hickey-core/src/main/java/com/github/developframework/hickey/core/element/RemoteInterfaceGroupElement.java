@@ -10,11 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 远程接口分组
+ *
  * @author qiuzhenhao
  */
-public class RemoteInterfaceGroup {
+public class RemoteInterfaceGroupElement {
 
-    private Map<String, RemoteInterface> remoteInterfaceMap = new ConcurrentHashMap<>();
+    private Map<String, RemoteInterfaceElement> remoteInterfaceMap = new ConcurrentHashMap<>();
 
     /* 分组名称 */
     @Getter
@@ -25,29 +26,31 @@ public class RemoteInterfaceGroup {
     @Getter
     private String domainPrefix;
 
-    public RemoteInterfaceGroup(String groupName) {
+    public RemoteInterfaceGroupElement(String groupName) {
         this.groupName = groupName;
     }
 
     /**
      * 增加远程接口配置
-     * @param remoteInterface
+     *
+     * @param remoteInterfaceElement
      */
-    public void addRemoteInterface(RemoteInterface remoteInterface) {
-        if(remoteInterfaceMap.containsKey(remoteInterface.getId())) {
-            throw new InterfaceExistException(remoteInterface.getId());
+    public void addRemoteInterface(RemoteInterfaceElement remoteInterfaceElement) {
+        if (remoteInterfaceMap.containsKey(remoteInterfaceElement.getId())) {
+            throw new InterfaceExistException(remoteInterfaceElement.getId());
         } else {
-            remoteInterfaceMap.put(remoteInterface.getId(), remoteInterface);
+            remoteInterfaceMap.put(remoteInterfaceElement.getId(), remoteInterfaceElement);
         }
     }
 
     /**
      * 提取远程接口配置
+     *
      * @param interfaceId
      * @return
      */
-    public RemoteInterface extractRemoteInterface(String interfaceId) {
-        if(remoteInterfaceMap.containsKey(interfaceId)) {
+    public RemoteInterfaceElement extractRemoteInterface(String interfaceId) {
+        if (remoteInterfaceMap.containsKey(interfaceId)) {
             return remoteInterfaceMap.get(interfaceId);
         } else {
             throw new InterfaceUndefinedException(interfaceId);

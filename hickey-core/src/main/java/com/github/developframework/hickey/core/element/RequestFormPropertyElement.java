@@ -2,15 +2,16 @@ package com.github.developframework.hickey.core.element;
 
 import com.github.developframework.hickey.core.value.HickeyValue;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Setter;
 
 /**
- * 远程接口请求头信息
+ * 远程接口表单属性
+ *
  * @author qiuzhenhao
  */
 @AllArgsConstructor
-@Getter
-public class RemoteInterfaceRequestHeader {
+@Setter
+public class RequestFormPropertyElement {
 
     private String name;
 
