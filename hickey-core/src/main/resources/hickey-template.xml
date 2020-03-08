@@ -1,6 +1,6 @@
 <hickey-configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                       xmlns="https://github.com/developframework/hickey/schema"
-                      xsi:schemaLocation="https://github.com/developframework/hickey/schema hickey-configuration-0.1.xsd">
+                      xsi:schemaLocation="https://github.com/developframework/hickey/schema hickey-configuration.xsd">
 
     <remote-interfaces group="test">
 
