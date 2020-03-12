@@ -147,7 +147,7 @@ public final class HickeyTerminal {
             for (Map.Entry<String, List<String>> entry : set) {
                 sb.append("    ").append(entry.getKey()).append(": ").append(StringUtils.join(entry.getValue(), "  |  ")).append('\n');
             }
-            sb.append("  body: \n    ").append(httpResponseData.getStringBody());
+            sb.append("  body: \n    ").append(httpResponseData.stringBody());
             sb.append("\n\n===========================================================【cost time: ").append(DateTimeAdvice.millisecondPretty(httpResponseData.getCostTime())).append("】===========================================================\n\n");
             log.debug(sb.toString());
         }
@@ -172,7 +172,7 @@ public final class HickeyTerminal {
         interfaceRequest.getHeaders().forEach((h, v) -> httpRequestData.addHeader(h, v.getValue(data)));
         //处理body
         RemoteInterfaceRequestBody body = interfaceRequest.getBody();
-        httpRequestData.setBody(body != null ? body.transform(data) : null);
+        httpRequestData.addBody(body != null ? body.transform(data) : null);
         return httpRequestData;
     }
 }

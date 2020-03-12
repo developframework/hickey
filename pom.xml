@@ -48,10 +48,10 @@
     </scm>
 
     <properties>
-        <version.spring-boot>2.1.8.RELEASE</version.spring-boot>
-        <version.spring>5.1.9.RELEASE</version.spring>
+        <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
+        <version.spring>5.2.4.RELEASE</version.spring>
         <version.develop-toolkit>1.0.2-SNAPSHOT</version.develop-toolkit>
-        <version.kite>0.16</version.kite>
+        <version.kite>0.18</version.kite>
     </properties>
 
     <dependencyManagement>

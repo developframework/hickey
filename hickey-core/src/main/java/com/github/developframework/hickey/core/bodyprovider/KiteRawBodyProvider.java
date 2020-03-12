@@ -5,7 +5,6 @@ import com.github.developframework.hickey.core.exception.HickeyException;
 import com.github.developframework.kite.core.KiteFactory;
 import com.github.developframework.kite.core.Producer;
 import com.github.developframework.kite.core.data.DataModel;
-import com.github.developframework.kite.core.data.HashDataModel;
 import lombok.AllArgsConstructor;
 
 /**
@@ -39,7 +38,7 @@ public class KiteRawBodyProvider implements RawBodyProvider {
                 throw new HickeyException("Kite provider does not support the \"PLAIN\" body data.");
             }
         }
-        DataModel dataModel = HashDataModel.singleton(defaultRoot, data);
+        DataModel dataModel = DataModel.singleton(defaultRoot, data);
         return producer.produce(dataModel, namespace, templateId);
     }
 }
