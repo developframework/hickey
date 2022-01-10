@@ -3,24 +3,37 @@ package com.github.developframework.hickey.core;
 import com.github.developframework.hickey.core.annotations.Endpoint;
 import com.github.developframework.hickey.core.annotations.Request;
 import com.github.developframework.hickey.core.structs.*;
-import lombok.RequiredArgsConstructor;
+import com.github.developframework.hickey.core.utils.U;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.function.Predicate;
 
 /**
  * @author qiushui on 2021-12-30.
  */
-@RequiredArgsConstructor
 public final class HickeyInvocationHandler implements InvocationHandler {
 
     private final HickeyOptions options;
 
     private final HickeyComponents components;
 
+    private final Endpoint endpoint;
+
+    private final Predicate<ResponseWrapper> fallPredicate;
+
+    private final Object fallbackInstance;
+
+    public HickeyInvocationHandler(HickeyOptions options, HickeyComponents components, Endpoint endpoint) {
+        this.options = options;
+        this.components = components;
+        this.endpoint = endpoint;
+        this.fallPredicate = U.noConstructorNewInstance(endpoint.fallPredicate(), "fallPredicate类必须要有无参构造方法");
+        this.fallbackInstance = buildFallbackInstance(endpoint);
+    }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
@@ -28,7 +41,22 @@ public final class HickeyInvocationHandler implements InvocationHandler {
         components.getInterceptors().forEach(interceptor -> interceptor.intercept(requestWrapper));
         final ResponseWrapper responseWrapper = components.getHickeyHttpExecutor().execute(requestWrapper);
         components.getHttpPostProcessors().forEach(processor -> processor.process(requestWrapper, responseWrapper));
-        return handleReturnValue(method, responseWrapper);
+        if (fallPredicate.test(responseWrapper)) {
+            return handleReturnValue(method, responseWrapper);
+        } else if (fallbackInstance != null) {
+            return U.invokeMethod(fallbackInstance.getClass(), method.getName(), method.getParameterTypes(), args);
+        } else {
+            throw new HickeyException(method.getName() + "执行失败并且未定义fallback");
+        }
+    }
+
+    private Object buildFallbackInstance(Endpoint endpoint) {
+        final Class<?> fallbackClass = endpoint.fallback();
+        Object fallbackInstance = null;
+        if (fallbackClass != Void.class) {
+            fallbackInstance = U.noConstructorNewInstance(fallbackClass, "fallback类必须要有无参构造方法");
+        }
+        return fallbackInstance;
     }
 
     /**
@@ -39,10 +67,6 @@ public final class HickeyInvocationHandler implements InvocationHandler {
      * @return RequestInfo
      */
     private RequestWrapper assembleRequestWrapper(Method method, Object[] args) {
-        final Endpoint endpoint = method.getDeclaringClass().getAnnotation(Endpoint.class);
-        if (endpoint == null) {
-            throw new IllegalStateException("接口类未设定注解@Endpoint");
-        }
         final RequestWrapper requestWrapper = new RequestWrapper();
         final Request request = method.getAnnotation(Request.class);
         requestWrapper.setLabel(request.label());

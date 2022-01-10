@@ -14,5 +14,5 @@ public abstract class HickeyHttpExecutor {
 
     protected final HickeyOptions options;
 
-    abstract ResponseWrapper execute(RequestWrapper requestWrapper);
+    protected abstract ResponseWrapper execute(RequestWrapper requestWrapper);
 }

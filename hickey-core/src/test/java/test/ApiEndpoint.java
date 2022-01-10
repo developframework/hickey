@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * @author qiushui on 2022-01-06.
  */
-@Endpoint("http://localhost:10000")
+@Endpoint(value = "http://localhost:10001", fallback = ApiEndpoint.ApiEndpointFallback.class)
 public interface ApiEndpoint {
 
     @Request(
@@ -21,4 +21,12 @@ public interface ApiEndpoint {
             contentType = ContentType.APPLICATION_JSON
     )
     String login(@PairMap Map<String, Object> map);
+
+    class ApiEndpointFallback implements ApiEndpoint {
+
+        @Override
+        public String login(Map<String, Object> map) {
+            return "aaaa";
+        }
+    }
 }

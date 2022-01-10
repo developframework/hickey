@@ -51,6 +51,7 @@ public final class HickeyComponents {
         resolvers.add(new UrlPairResolver());
         resolvers.add(new UrlPairMapResolver());
         resolvers.add(new PathResolver());
+        resolvers.add(new HeaderResolver());
         resolvers.add(new FormUrlencodedPairResolver());
         resolvers.add(new FormUrlencodedPairMapResolver());
         resolvers.add(new JsonPairResolver(objectMapper));
