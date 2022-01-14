@@ -22,9 +22,9 @@ public abstract class U {
     }
 
     @SneakyThrows({NoSuchMethodException.class, InvocationTargetException.class, IllegalAccessException.class})
-    public static Object invokeMethod(Class<?> clazz, String name, Class<?>[] parameterTypes, Object[] args) {
-        final Method fallbackMethod = clazz.getMethod(name, parameterTypes);
+    public static Object invokeMethod(Object instance, String name, Class<?>[] parameterTypes, Object[] args) {
+        final Method fallbackMethod = instance.getClass().getMethod(name, parameterTypes);
         fallbackMethod.setAccessible(true);
-        return fallbackMethod.invoke(clazz, args);
+        return fallbackMethod.invoke(instance, args);
     }
 }

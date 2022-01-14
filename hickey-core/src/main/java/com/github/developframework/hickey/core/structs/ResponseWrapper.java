@@ -3,7 +3,6 @@ package com.github.developframework.hickey.core.structs;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public final class ResponseWrapper {
     private Map<String, List<String>> headers;
 
     // 响应输入流
-    private InputStream responseBody;
+    private ResponseBody<?> responseBody;
 
     // 花费时间（毫秒）
     private long cost;

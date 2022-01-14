@@ -1,5 +1,6 @@
 package com.github.developframework.hickey.core;
 
+import com.github.developframework.hickey.core.structs.ContentType;
 import com.github.developframework.hickey.core.structs.RequestBody;
 import com.github.developframework.hickey.core.structs.RequestWrapper;
 import com.github.developframework.hickey.core.structs.ResponseWrapper;
@@ -12,6 +13,8 @@ import java.net.http.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 基于JDK的HttpClient实现Http执行器
@@ -69,5 +72,12 @@ public final class JDKHttpClientExecutor extends HickeyHttpExecutor {
             responseWrapper.setCost(requestWrapper.getBeginTimestamp().until(LocalDateTime.now(), ChronoUnit.MILLIS));
         }
         return responseWrapper;
+    }
+
+    public boolean isReadable(ResponseWrapper responseWrapper) {
+        final Map<String, List<String>> headers = responseWrapper.getHeaders();
+        final List<String> contentTypes = headers.get("Content-Type");
+        String contentTypeStr = contentTypes.isEmpty() ? null : contentTypes.get(0);
+        final ContentType contentType = ContentType.matches(contentTypeStr);
     }
 }

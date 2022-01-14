@@ -44,7 +44,7 @@ public final class HickeyInvocationHandler implements InvocationHandler {
         if (fallPredicate.test(responseWrapper)) {
             return handleReturnValue(method, responseWrapper);
         } else if (fallbackInstance != null) {
-            return U.invokeMethod(fallbackInstance.getClass(), method.getName(), method.getParameterTypes(), args);
+            return U.invokeMethod(fallbackInstance, method.getName(), method.getParameterTypes(), args);
         } else {
             throw new HickeyException(method.getName() + "执行失败并且未定义fallback");
         }
@@ -79,7 +79,7 @@ public final class HickeyInvocationHandler implements InvocationHandler {
                 options.readOption(HickeyOptions.KEY_DEFAULT_CHARSET, Charset.class)
         );
         resolve(method, args, request.contentType(), requestWrapper);
-        requestWrapper.getHeaders().put("Content-Type", request.contentType().getText());
+        requestWrapper.getHeaders().put("Content-Type", request.contentType().toString());
         return requestWrapper;
     }
 
