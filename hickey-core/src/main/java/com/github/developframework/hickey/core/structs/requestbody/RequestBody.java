@@ -1,4 +1,4 @@
-package com.github.developframework.hickey.core.structs;
+package com.github.developframework.hickey.core.structs.requestbody;
 
 import java.nio.charset.Charset;
 

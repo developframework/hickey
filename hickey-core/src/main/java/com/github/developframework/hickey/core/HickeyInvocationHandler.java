@@ -3,6 +3,7 @@ package com.github.developframework.hickey.core;
 import com.github.developframework.hickey.core.annotations.Endpoint;
 import com.github.developframework.hickey.core.annotations.Request;
 import com.github.developframework.hickey.core.structs.*;
+import com.github.developframework.hickey.core.structs.requestbody.EmptyRequestBody;
 import com.github.developframework.hickey.core.utils.U;
 
 import java.lang.reflect.InvocationHandler;
@@ -10,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -75,11 +77,12 @@ public final class HickeyInvocationHandler implements InvocationHandler {
         requestWrapper.setReadTimeout(
                 request.timeout() == -1 ? options.readOption(HickeyOptions.KEY_DEFAULT_READ_TIMEOUT, Duration.class) : Duration.ofSeconds(request.timeout())
         );
-        requestWrapper.setCharset(
-                options.readOption(HickeyOptions.KEY_DEFAULT_CHARSET, Charset.class)
-        );
-        resolve(method, args, request.contentType(), requestWrapper);
-        requestWrapper.getHeaders().put("Content-Type", request.contentType().toString());
+        final Charset charset = options.readOption(HickeyOptions.KEY_DEFAULT_CHARSET, Charset.class);
+        requestWrapper.setCharset(charset);
+        final MimeType mimeType = request.mimeType();
+        resolve(method, args, mimeType, requestWrapper);
+        final ContentType contentType = new ContentType(mimeType, Map.of("charset", charset.displayName()));
+        requestWrapper.getHeaders().put("Content-Type", contentType.toString());
         return requestWrapper;
     }
 
@@ -88,10 +91,10 @@ public final class HickeyInvocationHandler implements InvocationHandler {
      *
      * @param method         请求方式
      * @param args           接口入参
-     * @param contentType    请求体内容格式
+     * @param mimeType       请求体内容格式
      * @param requestWrapper 请求封装包
      */
-    private void resolve(Method method, Object[] args, ContentType contentType, RequestWrapper requestWrapper) {
+    private void resolve(Method method, Object[] args, MimeType mimeType, RequestWrapper requestWrapper) {
         final Parameter[] parameters = method.getParameters();
         for (int i = 0; i < parameters.length; i++) {
             final Parameter parameter = parameters[i];
@@ -100,7 +103,7 @@ public final class HickeyInvocationHandler implements InvocationHandler {
             metadata.setAnnotations(parameter.getAnnotations());
             metadata.setValue(args[i]);
             for (MethodParameterResolver resolver : components.getMethodParameterResolvers()) {
-                if (resolver.matches(metadata, contentType)) {
+                if (resolver.matches(metadata, mimeType)) {
                     resolver.assemble(metadata, requestWrapper);
                     break;
                 }

@@ -1,5 +1,6 @@
 package com.github.developframework.hickey.core.structs;
 
+import com.github.developframework.hickey.core.structs.requestbody.RequestBody;
 import lombok.Getter;
 import lombok.Setter;
 

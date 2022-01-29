@@ -1,7 +1,7 @@
 package com.github.developframework.hickey.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.developframework.hickey.core.structs.ContentType;
+import com.github.developframework.hickey.core.structs.MimeType;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -32,7 +32,7 @@ public final class HickeyOptions {
 
     public HickeyOptions() {
         options.put(KEY_DEFAULT_CHARSET, StandardCharsets.UTF_8);
-        options.put(KEY_DEFAULT_CONTENT_TYPE, ContentType.APPLICATION_JSON);
+        options.put(KEY_DEFAULT_CONTENT_TYPE, MimeType.APPLICATION_JSON);
         options.put(KEY_DEFAULT_CONNECTION_TIMEOUT, Duration.ofSeconds(10L));
         options.put(KEY_DEFAULT_READ_TIMEOUT, Duration.ofSeconds(10L));
         options.put(KEY_JACKSON_OBJECTMAPPER, new ObjectMapper());

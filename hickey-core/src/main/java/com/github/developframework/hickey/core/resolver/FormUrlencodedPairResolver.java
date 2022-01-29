@@ -2,10 +2,13 @@ package com.github.developframework.hickey.core.resolver;
 
 import com.github.developframework.hickey.core.MethodParameterResolver;
 import com.github.developframework.hickey.core.annotations.Pair;
-import com.github.developframework.hickey.core.structs.ContentType;
-import com.github.developframework.hickey.core.structs.FormUrlencodedBody;
 import com.github.developframework.hickey.core.structs.MethodParameterMetadata;
+import com.github.developframework.hickey.core.structs.MimeType;
+import com.github.developframework.hickey.core.structs.PairEntity;
 import com.github.developframework.hickey.core.structs.RequestWrapper;
+import com.github.developframework.hickey.core.structs.requestbody.FormUrlencodedRequestBody;
+
+import java.util.Map;
 
 /**
  * @author qiushui on 2022-01-06.
@@ -13,18 +16,25 @@ import com.github.developframework.hickey.core.structs.RequestWrapper;
 public final class FormUrlencodedPairResolver implements MethodParameterResolver {
 
     @Override
-    public boolean matches(MethodParameterMetadata metadata, ContentType contentType) {
-        return metadata.hasAnnotation(Pair.class) && contentType == ContentType.FORM_URLENCODED;
+    public boolean matches(MethodParameterMetadata metadata, MimeType mimeType) {
+        return mimeType == MimeType.FORM_URLENCODED;
     }
 
     @Override
     public void assemble(MethodParameterMetadata metadata, RequestWrapper requestWrapper) {
-        FormUrlencodedBody requestBody = (FormUrlencodedBody) requestWrapper.getRequestBody();
+        FormUrlencodedRequestBody requestBody = (FormUrlencodedRequestBody) requestWrapper.getRequestBody();
         if (requestBody == null) {
-            requestBody = new FormUrlencodedBody();
+            requestBody = new FormUrlencodedRequestBody();
             requestWrapper.setRequestBody(requestBody);
         }
         final Pair pair = metadata.getAnnotation(Pair.class);
-        requestBody.addPair(pair.value(), metadata.getValue());
+        final Object value = metadata.getValue();
+        if (value == null) {
+            requestBody.addPair(pair.value(), "");
+        } else if (value instanceof Map || value.getClass().getAnnotation(PairEntity.class) != null) {
+            requestBody.addPairs(value);
+        } else {
+            requestBody.addPair(pair.value(), value);
+        }
     }
 }

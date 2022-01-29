@@ -1,7 +1,7 @@
 package com.github.developframework.hickey.core.annotations;
 
-import com.github.developframework.hickey.core.structs.ContentType;
 import com.github.developframework.hickey.core.structs.HttpMethod;
+import com.github.developframework.hickey.core.structs.MimeType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,7 +21,7 @@ public @interface Request {
 
     HttpMethod method();
 
-    ContentType contentType() default ContentType.NONE;
+    MimeType mimeType() default MimeType.NONE;
 
     long timeout() default -1;
 }

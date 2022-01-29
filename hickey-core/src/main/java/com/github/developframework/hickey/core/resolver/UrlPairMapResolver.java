@@ -2,8 +2,8 @@ package com.github.developframework.hickey.core.resolver;
 
 import com.github.developframework.hickey.core.MethodParameterResolver;
 import com.github.developframework.hickey.core.annotations.UrlPairMap;
-import com.github.developframework.hickey.core.structs.ContentType;
 import com.github.developframework.hickey.core.structs.MethodParameterMetadata;
+import com.github.developframework.hickey.core.structs.MimeType;
 import com.github.developframework.hickey.core.structs.RequestWrapper;
 
 import java.lang.reflect.Field;
@@ -15,7 +15,7 @@ import java.util.Map;
 public final class UrlPairMapResolver implements MethodParameterResolver {
 
     @Override
-    public boolean matches(MethodParameterMetadata metadata, ContentType contentType) {
+    public boolean matches(MethodParameterMetadata metadata, MimeType mimeType) {
         return metadata.hasAnnotation(UrlPairMap.class);
     }
 

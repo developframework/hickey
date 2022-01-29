@@ -1,7 +1,7 @@
 package com.github.developframework.hickey.core;
 
-import com.github.developframework.hickey.core.structs.ContentType;
 import com.github.developframework.hickey.core.structs.MethodParameterMetadata;
+import com.github.developframework.hickey.core.structs.MimeType;
 import com.github.developframework.hickey.core.structs.RequestWrapper;
 
 /**
@@ -14,11 +14,11 @@ public interface MethodParameterResolver {
     /**
      * 判定是否需要该解析器处理
      *
-     * @param metadata    方法参数元数据
-     * @param contentType 请求体内容格式
+     * @param metadata 方法参数元数据
+     * @param mimeType 请求体内容格式
      * @return 是否
      */
-    boolean matches(MethodParameterMetadata metadata, ContentType contentType);
+    boolean matches(MethodParameterMetadata metadata, MimeType mimeType);
 
     /**
      * 装配

@@ -1,5 +1,6 @@
 package com.github.developframework.hickey.core.structs;
 
+import com.github.developframework.hickey.core.structs.responsebody.ResponseBody;
 import lombok.Getter;
 import lombok.Setter;
 

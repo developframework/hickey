@@ -1,4 +1,4 @@
-package com.github.developframework.hickey.core.structs;
+package com.github.developframework.hickey.core.structs.responsebody;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +18,7 @@ public abstract class ResponseBody<T> {
         this.charset = charset;
     }
 
-    protected abstract T getBody();
+    public abstract T getBody();
 
-    protected abstract String pretty();
+    public abstract String pretty();
 }

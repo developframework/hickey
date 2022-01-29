@@ -1,9 +1,9 @@
 package com.github.developframework.hickey.core;
 
 import com.github.developframework.hickey.core.structs.ContentType;
-import com.github.developframework.hickey.core.structs.RequestBody;
 import com.github.developframework.hickey.core.structs.RequestWrapper;
 import com.github.developframework.hickey.core.structs.ResponseWrapper;
+import com.github.developframework.hickey.core.structs.requestbody.RequestBody;
 
 import java.io.IOException;
 import java.io.InputStream;

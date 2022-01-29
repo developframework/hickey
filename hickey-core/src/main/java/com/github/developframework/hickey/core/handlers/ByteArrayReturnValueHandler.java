@@ -4,6 +4,7 @@ import com.github.developframework.hickey.core.HickeyException;
 import com.github.developframework.hickey.core.HickeyOptions;
 import com.github.developframework.hickey.core.ReturnValueHandler;
 import com.github.developframework.hickey.core.structs.ResponseWrapper;
+import com.github.developframework.hickey.core.structs.responsebody.ResponseBody;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,7 +23,9 @@ public class ByteArrayReturnValueHandler implements ReturnValueHandler {
     @Override
     public Object handle(Method method, HickeyOptions options, ResponseWrapper responseWrapper) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            responseWrapper.getResponseBody().transferTo(os);
+            final ResponseBody<?> responseBody = responseWrapper.getResponseBody();
+            // TODO
+            final Object body = responseBody.getBody();
             return os.toByteArray();
         } catch (IOException e) {
             throw new HickeyException(e.getMessage(), e);

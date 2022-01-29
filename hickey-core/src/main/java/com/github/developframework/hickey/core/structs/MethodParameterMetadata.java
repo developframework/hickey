@@ -36,6 +36,6 @@ public final class MethodParameterMetadata {
                 return (T) a;
             }
         }
-        throw new AssertionError();
+        throw new IllegalStateException("未设置@" + annotationClass.getSimpleName());
     }
 }

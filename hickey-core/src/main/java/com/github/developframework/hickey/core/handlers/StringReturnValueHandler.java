@@ -23,7 +23,7 @@ public class StringReturnValueHandler implements ReturnValueHandler {
     @Override
     public Object handle(Method method, HickeyOptions options, ResponseWrapper responseWrapper) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            responseWrapper.getResponseBody().transferTo(os);
+            responseWrapper.getResponseBody();
             final Charset charset = options.readOption(HickeyOptions.KEY_DEFAULT_CHARSET, Charset.class);
             return os.toString(charset);
         } catch (IOException e) {

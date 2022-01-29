@@ -1,5 +1,6 @@
 package com.github.developframework.hickey.core.structs;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public final class ContentType {
 
+    @Getter
     private final MimeType mimeType;
 
     private final Map<String, String> parameters;
